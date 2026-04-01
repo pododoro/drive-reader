@@ -67,21 +67,22 @@ async function main() {
     assert.equal(await page.getByTestId('website-url-input').isVisible(), true);
 
     await fileMode.click();
+    const editToggle = page.getByTestId('edit-toggle');
+    const editBody = page.getByTestId('edit-body');
     const confirmInput = page.getByTestId('confirm-text-input');
+    const scroll = page.getByTestId('preview-scroll');
+
+    assert.equal(await confirmInput.isVisible(), false);
+
+    const beforeHeight = await editBody.evaluate((element) => element.getBoundingClientRect().height);
+    await editToggle.click();
+    await page.waitForTimeout(100);
+    const afterHeight = await editBody.evaluate((element) => element.getBoundingClientRect().height);
+    assert.ok(afterHeight > beforeHeight, `Expected edit body to expand (${beforeHeight} -> ${afterHeight})`);
+    assert.equal(await confirmInput.isVisible(), true);
     await confirmInput.fill(Array.from({ length: 80 }, (_, index) => `Line ${index + 1}`).join('\n'));
     await confirmInput.focus();
     await page.keyboard.press('PageDown');
-
-    const toggle = page.getByTestId('preview-toggle');
-    const body = page.getByTestId('confirm-body');
-    const scroll = page.getByTestId('preview-scroll');
-
-    const beforeHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
-    await toggle.click();
-    await page.waitForTimeout(100);
-    const afterHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
-    assert.ok(afterHeight < beforeHeight, `Expected confirm body to collapse (${beforeHeight} -> ${afterHeight})`);
-    assert.equal(await page.getByTestId('confirm-text-input').isVisible(), false);
     assert.equal(await page.getByTestId('load-sample-button').isVisible(), true);
     assert.equal(await page.getByTestId('clear-button').isVisible(), true);
     assert.equal(await page.getByTestId('reset-button').isVisible(), true);
@@ -106,11 +107,11 @@ async function main() {
     );
     assert.ok(scrollInfo.scrollTop > 0, 'Expected preview scroll container to accept scrollTop changes');
 
-    await toggle.click();
+    await editToggle.click();
     await page.waitForTimeout(100);
-    const collapsedHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
-    assert.ok(collapsedHeight > afterHeight, `Expected confirm body to expand (${afterHeight} -> ${collapsedHeight})`);
-    assert.equal(await page.getByTestId('confirm-text-input').isVisible(), true);
+    const collapsedHeight = await editBody.evaluate((element) => element.getBoundingClientRect().height);
+    assert.ok(collapsedHeight < afterHeight, `Expected edit body to collapse (${afterHeight} -> ${collapsedHeight})`);
+    assert.equal(await confirmInput.isVisible(), false);
 
     console.log('QA workflow passed.');
   } finally {

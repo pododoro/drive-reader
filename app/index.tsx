@@ -1195,7 +1195,7 @@ export default function HomeScreen() {
   const [recentSources, setRecentSources] = useState<RecentSource[]>([]);
   const [status, setStatus] = useState('Ready for text, file URIs, deep links, and share intents.');
   const [isBusy, setIsBusy] = useState(false);
-  const [isConfirmDetailsExpanded, setIsConfirmDetailsExpanded] = useState(true);
+  const [isEditTextExpanded, setIsEditTextExpanded] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>('file');
 
   const [blogSnapshot, setBlogSnapshot] = useState<{
@@ -1490,10 +1490,10 @@ export default function HomeScreen() {
     setStatus('Cleared the text field.');
   };
 
-  const togglePreviewExpansion = () => {
+  const toggleEditTextExpansion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     Keyboard.dismiss();
-    setIsConfirmDetailsExpanded((value) => !value);
+    setIsEditTextExpanded((value) => !value);
   };
 
   const openAppUrl = async () => {
@@ -1957,65 +1957,6 @@ export default function HomeScreen() {
               <Volume2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
               <Text style={[styles.sectionTitle, dark && styles.textLight]}>Confirm it</Text>
             </View>
-            <Pressable
-              onPress={togglePreviewExpansion}
-              testID="preview-toggle"
-              style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
-              <Text style={styles.expandButtonLabel}>
-                {isConfirmDetailsExpanded ? 'Collapse' : 'Expand'}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View
-            testID="confirm-body"
-            style={[styles.confirmBody, !isConfirmDetailsExpanded && styles.confirmBodyCollapsed]}>
-            <Text style={[styles.helperText, dark && styles.textMuted]}>
-              Check the preview before you press Speak.
-            </Text>
-
-            <View style={styles.actionsWrap}>
-              <ActionButton
-                label="Load sample"
-                icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                onPress={() => setText(SAMPLE_TEXT)}
-                variant="secondary"
-                testID="load-sample-button"
-              />
-              <ActionButton
-                label="Clear"
-                icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                onPress={clearTextOnly}
-                variant="ghost"
-                testID="clear-button"
-              />
-              <ActionButton
-                label="Reset"
-                icon={<Square size={16} color="#FFFFFF" />}
-                onPress={resetAll}
-                testID="reset-button"
-              />
-            </View>
-
-            {isConfirmDetailsExpanded ? (
-              <TextInput
-                value={text}
-                onChangeText={setText}
-                testID="confirm-text-input"
-                multiline
-                scrollEnabled
-                textAlignVertical="top"
-                placeholder="Paste text here or load it from a share intent."
-                placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
-                style={[styles.textInput, dark && styles.textInputDark]}
-              />
-            ) : (
-              <View style={styles.confirmSummary}>
-                <Text style={[styles.confirmSummaryText, dark && styles.textLight]} numberOfLines={2}>
-                  {previewSnippet || 'No text loaded yet.'}
-                </Text>
-              </View>
-            )}
           </View>
 
           <View
@@ -2037,6 +1978,75 @@ export default function HomeScreen() {
                 {text || 'No text loaded yet.'}
               </Text>
             </ScrollView>
+          </View>
+
+          <View
+            testID="edit-body"
+            style={[styles.editBody, !isEditTextExpanded && styles.editBodyCollapsed]}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <Square size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Edit text</Text>
+              </View>
+              <Pressable
+                onPress={toggleEditTextExpansion}
+                testID="edit-toggle"
+                style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
+                <Text style={styles.expandButtonLabel}>
+                  {isEditTextExpanded ? 'Close' : 'Edit'}
+                </Text>
+              </Pressable>
+            </View>
+
+            <Text style={[styles.helperText, dark && styles.textMuted]}>
+              Open this only when you need to fix or replace the text.
+            </Text>
+
+            {isEditTextExpanded ? (
+              <>
+                <TextInput
+                  value={text}
+                  onChangeText={setText}
+                  testID="confirm-text-input"
+                  multiline
+                  scrollEnabled
+                  textAlignVertical="top"
+                  placeholder="Paste text here or load it from a share intent."
+                  placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                  style={[styles.textInput, dark && styles.textInputDark]}
+                />
+
+                <View style={styles.actionsWrap}>
+                  <ActionButton
+                    label="Load sample"
+                    icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                    onPress={() => setText(SAMPLE_TEXT)}
+                    variant="secondary"
+                    testID="load-sample-button"
+                  />
+                  <ActionButton
+                    label="Clear"
+                    icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                    onPress={clearTextOnly}
+                    variant="ghost"
+                    testID="clear-button"
+                  />
+                  <ActionButton
+                    label="Reset"
+                    icon={<Square size={16} color="#FFFFFF" />}
+                    onPress={resetAll}
+                    testID="reset-button"
+                  />
+                </View>
+              </>
+            ) : (
+              <View style={styles.editSummary}>
+                <Text style={[styles.editSummaryLabel, dark && styles.textSoft]}>Current text</Text>
+                <Text style={[styles.editSummaryText, dark && styles.textLight]} numberOfLines={2}>
+                  {previewSnippet || 'No text loaded yet.'}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -2513,17 +2523,24 @@ const styles = StyleSheet.create({
     color: '#E2E8F0',
     borderColor: 'rgba(148, 163, 184, 0.16)',
   },
-  confirmBody: {
+  editBody: {
     gap: 12,
   },
-  confirmBodyCollapsed: {
+  editBodyCollapsed: {
     gap: 8,
   },
-  confirmSummary: {
+  editSummary: {
     gap: 6,
     paddingVertical: 2,
   },
-  confirmSummaryText: {
+  editSummaryLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: '#64748B',
+  },
+  editSummaryText: {
     fontSize: 15,
     lineHeight: 22,
     color: '#0F172A',
