@@ -16,6 +16,7 @@ Last updated: 2026-04-01
 - Naver blog extraction flow is implemented in `app/index.tsx`.
 - Supporting scripts exist for live and golden validation.
 - Validation is driven by the repository's own `scripts/`-based checks.
+- Web workflow QA is covered by `npm run qa:workflow`.
 - Project documentation now lives in `docs/` for daily logging, status tracking, and PRD planning.
 - Branch naming and PR workflow notes live in `docs/branching.md`.
 
@@ -32,6 +33,7 @@ Last updated: 2026-04-01
    - `npm run lint`
    - `npm run test:naver`
    - `npm run test:naver-live`
+   - `npm run qa:workflow`
 4. Tighten the Naver extraction flow if live pages drift.
 5. Keep daily progress in `docs/daily-log.md` after each work session.
 6. Use `npm run log:new` to add a fresh dated section before writing the day's notes.

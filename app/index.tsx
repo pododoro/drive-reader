@@ -166,14 +166,17 @@ function InputModeButton({
   label,
   active,
   onPress,
+  testID,
 }: {
   label: string;
   active: boolean;
   onPress: () => void;
+  testID: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
       style={({ pressed }) => [
         styles.modeChip,
         active && styles.modeChipActive,
@@ -1091,15 +1094,18 @@ function ActionButton({
   icon,
   onPress,
   variant = 'primary',
+  testID,
 }: {
   label: string;
   icon: ReactNode;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'ghost';
+  testID?: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
       style={({ pressed }) => [
         styles.button,
         variant === 'primary' && styles.buttonPrimary,
@@ -1794,13 +1800,28 @@ export default function HomeScreen() {
           </Text>
 
           <View style={styles.modeRow}>
-            <InputModeButton label="Internal file" active={inputMode === 'file'} onPress={() => setInputMode('file')} />
-            <InputModeButton label="Naver blog" active={inputMode === 'naver'} onPress={() => setInputMode('naver')} />
-            <InputModeButton label="Website" active={inputMode === 'website'} onPress={() => setInputMode('website')} />
+            <InputModeButton
+              label="Internal file"
+              active={inputMode === 'file'}
+              onPress={() => setInputMode('file')}
+              testID="input-mode-file"
+            />
+            <InputModeButton
+              label="Naver blog"
+              active={inputMode === 'naver'}
+              onPress={() => setInputMode('naver')}
+              testID="input-mode-naver"
+            />
+            <InputModeButton
+              label="Website"
+              active={inputMode === 'website'}
+              onPress={() => setInputMode('website')}
+              testID="input-mode-website"
+            />
           </View>
 
           {inputMode === 'file' ? (
-            <View style={styles.inputPanel}>
+            <View style={styles.inputPanel} testID="input-panel-file">
               <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Internal file</Text>
               <Text style={[styles.helperText, dark && styles.textMuted]}>
                 Pick a local file, paste a file path, or open a deep link.
@@ -1808,6 +1829,7 @@ export default function HomeScreen() {
               <TextInput
                 value={manualFileUri}
                 onChangeText={setManualFileUri}
+                testID="file-uri-input"
                 placeholder="file:///path/to/book.txt"
                 placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
                 autoCapitalize="none"
@@ -1837,7 +1859,7 @@ export default function HomeScreen() {
           ) : null}
 
           {inputMode === 'naver' ? (
-            <View style={styles.inputPanel}>
+            <View style={styles.inputPanel} testID="input-panel-naver">
               <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Naver blog</Text>
               <Text style={[styles.helperText, dark && styles.textMuted]}>
                 Paste a Naver blog URL, extract the post body, then save or share it.
@@ -1845,6 +1867,7 @@ export default function HomeScreen() {
               <TextInput
                 value={blogUrl}
                 onChangeText={setBlogUrl}
+                testID="naver-url-input"
                 placeholder="https://blog.naver.com/..."
                 placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
                 autoCapitalize="none"
@@ -1881,7 +1904,7 @@ export default function HomeScreen() {
           ) : null}
 
           {inputMode === 'website' ? (
-            <View style={styles.inputPanel}>
+            <View style={styles.inputPanel} testID="input-panel-website">
               <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Website</Text>
               <Text style={[styles.helperText, dark && styles.textMuted]}>
                 Paste a normal website URL. Drive Reader will extract readable text from the page.
@@ -1889,6 +1912,7 @@ export default function HomeScreen() {
               <TextInput
                 value={websiteUrl}
                 onChangeText={setWebsiteUrl}
+                testID="website-url-input"
                 placeholder="https://example.com/article"
                 placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
                 autoCapitalize="none"
@@ -1934,6 +1958,7 @@ export default function HomeScreen() {
                 Keyboard.dismiss();
                 setIsPreviewExpanded((value) => !value);
               }}
+              testID="preview-toggle"
               style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
               <Text style={styles.expandButtonLabel}>
                 {isPreviewExpanded ? 'Collapse' : 'Expand'}
@@ -1948,6 +1973,7 @@ export default function HomeScreen() {
           <TextInput
             value={text}
             onChangeText={setText}
+            testID="confirm-text-input"
             multiline
             scrollEnabled
             textAlignVertical="top"
@@ -1956,7 +1982,9 @@ export default function HomeScreen() {
             style={[styles.textInput, dark && styles.textInputDark]}
           />
 
-          <View style={[styles.readerBox, dark && styles.readerBoxDark, isPreviewExpanded && styles.readerBoxExpanded]}>
+          <View
+            testID="preview-panel"
+            style={[styles.readerBox, dark && styles.readerBoxDark, isPreviewExpanded && styles.readerBoxExpanded]}>
             <View style={styles.readerHeader}>
               <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
               <Text style={[styles.readerHint, dark && styles.textMuted]}>
@@ -1964,6 +1992,7 @@ export default function HomeScreen() {
               </Text>
             </View>
             <ScrollView
+              testID="preview-scroll"
               nestedScrollEnabled
               showsVerticalScrollIndicator
               style={styles.readerScroll}
@@ -2083,12 +2112,14 @@ export default function HomeScreen() {
               label="Speak"
               icon={<Mic2 size={16} color="#FFFFFF" />}
               onPress={speakText}
+              testID="speak-button"
             />
             <ActionButton
               label="Stop"
               icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
               onPress={stopSpeech}
               variant="secondary"
+              testID="stop-button"
             />
           </View>
         </View>
