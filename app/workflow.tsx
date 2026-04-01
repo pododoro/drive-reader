@@ -50,7 +50,9 @@ export default function WorkflowScreen() {
             </View>
           </View>
           <Link href="/" dismissTo asChild>
-            <Pressable style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
+            <Pressable
+              testID="workflow-back"
+              style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
               <ArrowLeft size={16} color="#FFFFFF" />
               <Text style={styles.backLabel}>Back to app</Text>
             </Pressable>

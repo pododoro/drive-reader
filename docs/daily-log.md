@@ -26,6 +26,7 @@ Purpose: capture one concise entry per workday so the next agent can reconstruct
 
 - Context: Baseline setup, documentation handoff, and GitHub version control initialization.
 - Done: Created the first stable commit, connected the repository to GitHub, merged the remote initial commit history, and added the working docs for daily logs, status tracking, and product planning.
-- Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. Later, the workflow QA smoke test passed with `npm run qa:workflow` against the local web build.
+- Done: Added workflow QA automation, GitHub Actions CI wiring, and a testing strategy document for web QA versus native Expo Go verification.
+- Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. The workflow QA smoke test passed with `npm run qa:workflow` against the local web build, and `npm run lint` / `npx tsc --noEmit` remained clean.
 - Blocked: No immediate blocker. Future work still depends on keeping the Naver extraction checks healthy as the source pages change.
-- Next: Record any feature work in this file as a new dated entry, update the status doc after meaningful milestones, and open PRs from topic branches instead of pushing directly to `main`.
+- Next: Keep the workflow QA coverage aligned with the UI, and add native automation only if Expo Go manual checks stop being sufficient.

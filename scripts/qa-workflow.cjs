@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const { chromium } = require('@playwright/test');
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -27,10 +28,12 @@ async function openApp(page) {
 }
 
 async function main() {
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: CHROME_PATH,
-  });
+  const launchOptions = { headless: true };
+  if (fs.existsSync(CHROME_PATH)) {
+    launchOptions.executablePath = CHROME_PATH;
+  }
+
+  const browser = await chromium.launch(launchOptions);
 
   const page = await browser.newPage({
     viewport: { width: 430, height: 932 },
@@ -44,10 +47,17 @@ async function main() {
     const fileMode = page.getByTestId('input-mode-file');
     const naverMode = page.getByTestId('input-mode-naver');
     const websiteMode = page.getByTestId('input-mode-website');
+    const helpLink = page.getByTestId('help-link');
 
     assert.equal(await fileMode.isVisible(), true);
     assert.equal(await naverMode.isVisible(), true);
     assert.equal(await websiteMode.isVisible(), true);
+    assert.equal(await helpLink.isVisible(), true);
+
+    await helpLink.click();
+    await page.getByText('How to use the app').waitFor({ timeout: 10000 });
+    await page.getByTestId('workflow-back').click();
+    await page.getByText('Put data in').waitFor({ timeout: 10000 });
 
     await naverMode.click();
     assert.equal(await page.getByTestId('naver-url-input').isVisible(), true);
@@ -59,6 +69,8 @@ async function main() {
     await fileMode.click();
     const confirmInput = page.getByTestId('confirm-text-input');
     await confirmInput.fill(Array.from({ length: 80 }, (_, index) => `Line ${index + 1}`).join('\n'));
+    await confirmInput.focus();
+    await page.keyboard.press('PageDown');
 
     const toggle = page.getByTestId('preview-toggle');
     const panel = page.getByTestId('preview-panel');
@@ -79,10 +91,15 @@ async function main() {
         scrollTop: node.scrollTop,
         clientHeight: node.clientHeight,
         scrollHeight: node.scrollHeight,
+        overflowY: getComputedStyle(node).overflowY,
       };
     });
 
     assert.equal(scrollInfo.canScroll, true, 'Expected preview content to overflow for internal scrolling');
+    assert.ok(
+      scrollInfo.overflowY === 'auto' || scrollInfo.overflowY === 'scroll' || scrollInfo.overflowY === 'overlay',
+      `Expected preview scroll container to allow scrolling, got ${scrollInfo.overflowY}`
+    );
     assert.ok(scrollInfo.scrollTop > 0, 'Expected preview scroll container to accept scrollTop changes');
 
     await toggle.click();

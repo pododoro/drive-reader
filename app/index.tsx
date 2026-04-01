@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -103,21 +103,6 @@ function formatBytes(value: number | null) {
 
 function makeRecentSourceId(kind: RecentSource['kind'], value: string) {
   return `${kind}:${value}`;
-}
-
-function summarizeInlineText(text: string, maxLength = 36) {
-  const normalized = normalizeText(text).replace(/\s+/g, ' ');
-  if (!normalized) {
-    return 'Empty text';
-  }
-
-  return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}…` : normalized;
-}
-
-function formatRecentSourceLabel(kind: RecentSource['kind'], value: string) {
-  const fallback = kind === 'file' ? 'File path' : kind === 'url' ? 'Web link' : 'Text';
-  const summary = summarizeInlineText(value);
-  return summary ? `${fallback}: ${summary}` : fallback;
 }
 
 function rememberRecentSource(
@@ -796,7 +781,7 @@ function buildNaverUrlVariants(inputUrl: string) {
 
 function buildNaverRetryProfiles(inputUrl: string) {
   const urls = buildNaverUrlVariants(inputUrl);
-  const profiles: Array<{ url: string; userAgent: string }> = [];
+  const profiles: { url: string; userAgent: string }[] = [];
 
   for (const url of urls) {
     profiles.push({ url, userAgent: NAVER_MOBILE_USER_AGENT });
@@ -894,7 +879,7 @@ function extractTextFromHtml(html: string, pageUrl: string) {
     'blog_view',
   ];
 
-  const textCandidates: Array<{ text: string; score: number; bodyLines: number }> = [];
+  const textCandidates: { text: string; score: number; bodyLines: number }[] = [];
   for (const marker of markers) {
     const candidateHtml = extractBodyCandidate(html, marker);
     if (!candidateHtml) {
@@ -1207,7 +1192,6 @@ export default function HomeScreen() {
   const [recentSources, setRecentSources] = useState<RecentSource[]>([]);
   const [status, setStatus] = useState('Ready for text, file URIs, deep links, and share intents.');
   const [isBusy, setIsBusy] = useState(false);
-  const [isBlogBusy, setIsBlogBusy] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>('file');
 
@@ -1588,7 +1572,6 @@ export default function HomeScreen() {
     }
 
     setIsBusy(true);
-    setIsBlogBusy(true);
       try {
         const result = await extractNaverBlogText(url);
         const textSnapshotName = `${safeFileName(result.title)}-${Date.now()}.txt`;
@@ -1637,7 +1620,6 @@ export default function HomeScreen() {
         Alert.alert('Drive Reader', message);
       } finally {
         setIsBusy(false);
-        setIsBlogBusy(false);
     }
   };
 
@@ -1765,7 +1747,9 @@ export default function HomeScreen() {
               </Text>
             </View>
             <Link href="/workflow" asChild>
-              <Pressable style={({ pressed }) => [styles.helpPill, pressed && styles.buttonPressed]}>
+              <Pressable
+                testID="help-link"
+                style={({ pressed }) => [styles.helpPill, pressed && styles.buttonPressed]}>
                 <Text style={styles.helpPillText}>How to use</Text>
               </Pressable>
             </Link>
