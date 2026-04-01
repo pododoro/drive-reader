@@ -2092,11 +2092,11 @@ const styles = StyleSheet.create({
   },
   workflowStep: {
     borderRadius: 18,
-    padding: 14,
+    padding: 16,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: 'rgba(15, 23, 42, 0.08)',
-    gap: 5,
+    gap: 6,
   },
   workflowStepDark: {
     backgroundColor: '#081423',
@@ -2121,7 +2121,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
-    padding: 16,
+    padding: 18,
     gap: 14,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -2264,14 +2264,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   inputStack: {
-    gap: 14,
+    gap: 16,
   },
   inputStackItem: {
-    gap: 10,
+    gap: 12,
   },
   fileReaderActions: {
     flexDirection: 'column',
-    gap: 10,
+    gap: 12,
   },
   actionsWrap: {
     flexDirection: 'row',
@@ -2317,7 +2317,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   textInput: {
-    minHeight: 190,
+    minHeight: 210,
     borderRadius: 20,
     padding: 16,
     backgroundColor: '#F8FAFC',
@@ -2338,9 +2338,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(15, 23, 42, 0.08)',
     backgroundColor: '#F8FAFC',
-    padding: 14,
+    padding: 16,
     gap: 10,
-    maxHeight: 280,
+    maxHeight: 300,
   },
   readerBoxDark: {
     backgroundColor: '#081423',
@@ -2361,7 +2361,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   readerScroll: {
-    maxHeight: 220,
+    maxHeight: 240,
   },
   readerScrollContent: {
     paddingBottom: 6,
@@ -2382,7 +2382,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sourceChip: {
-    minWidth: 150,
+    minWidth: 160,
     flexGrow: 1,
     borderRadius: 18,
     paddingHorizontal: 14,
@@ -2411,7 +2411,7 @@ const styles = StyleSheet.create({
   singleLineInput: {
     borderRadius: 18,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     backgroundColor: '#F8FAFC',
     color: '#0F172A',
     fontSize: 14,
