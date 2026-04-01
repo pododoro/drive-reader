@@ -2,13 +2,16 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  LayoutAnimation,
   Keyboard,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  UIManager,
   Share,
 } from 'react-native';
 import { Link } from 'expo-router';
@@ -1207,6 +1210,12 @@ export default function HomeScreen() {
     .trim();
 
   useEffect(() => {
+    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
+  useEffect(() => {
     let alive = true;
 
     const syncFromUrl = async () => {
@@ -1479,6 +1488,12 @@ export default function HomeScreen() {
   const clearTextOnly = () => {
     setText('');
     setStatus('Cleared the text field.');
+  };
+
+  const togglePreviewExpansion = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Keyboard.dismiss();
+    setIsPreviewExpanded((value) => !value);
   };
 
   const openAppUrl = async () => {
@@ -1943,10 +1958,7 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, dark && styles.textLight]}>Confirm it</Text>
             </View>
             <Pressable
-              onPress={() => {
-                Keyboard.dismiss();
-                setIsPreviewExpanded((value) => !value);
-              }}
+              onPress={togglePreviewExpansion}
               testID="preview-toggle"
               style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
               <Text style={styles.expandButtonLabel}>
@@ -1978,8 +1990,8 @@ export default function HomeScreen() {
               <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
               <Text style={[styles.readerHint, dark && styles.textMuted]}>
                 {isPreviewExpanded
-                  ? 'Tap Collapse to return to a short preview.'
-                  : 'This shows the first 10 lines until you expand it.'}
+                  ? 'Tap Collapse to shrink this card and hide the extra lines.'
+                  : 'This shows a short preview until you expand it.'}
               </Text>
             </View>
             {isPreviewExpanded ? (
@@ -1997,7 +2009,7 @@ export default function HomeScreen() {
               <Text
                 style={[styles.readerText, styles.readerPreviewText, dark && styles.textLight]}
                 selectable
-                numberOfLines={10}>
+                numberOfLines={4}>
                 {previewSnippet || 'No text loaded yet.'}
               </Text>
             )}
