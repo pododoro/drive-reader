@@ -2,6 +2,7 @@
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -1740,7 +1741,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled
+        showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <View style={styles.heroTopRow}>
             <View style={styles.brandMark}>
@@ -1924,7 +1930,10 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, dark && styles.textLight]}>Confirm it</Text>
             </View>
             <Pressable
-              onPress={() => setIsPreviewExpanded((value) => !value)}
+              onPress={() => {
+                Keyboard.dismiss();
+                setIsPreviewExpanded((value) => !value);
+              }}
               style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
               <Text style={styles.expandButtonLabel}>
                 {isPreviewExpanded ? 'Collapse' : 'Expand'}
@@ -2465,6 +2474,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 10,
     height: 150,
+    overflow: 'hidden',
   },
   readerBoxExpanded: {
     height: 300,
@@ -2491,6 +2501,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   readerScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
     paddingBottom: 6,
   },
   readerText: {
