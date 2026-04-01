@@ -1,9 +1,20 @@
 import * as Speech from 'expo-speech';
+import { createAudioPlayer } from 'expo-audio';
+import { Platform } from 'react-native';
+
+import {
+  clearLocalTts,
+  isLocalTtsAvailable,
+  synthesizeLocalTts,
+  stopLocalTts,
+} from './local-tts';
 
 type SpeechControllerHandlers = {
   onStatus: (status: string) => void;
   onError: (message: string) => void;
 };
+
+type PlaybackPlayer = ReturnType<typeof createAudioPlayer>;
 
 function splitTextForSpeech(input: string, maxChunkLength = 3800) {
   const normalized = input.replace(/\r\n/g, '\n').trim();
@@ -85,16 +96,59 @@ function splitTextForSpeech(input: string, maxChunkLength = 3800) {
   return chunks;
 }
 
+function getLockScreenMetadata() {
+  return {
+    title: 'Drive Reader',
+    artist: 'Local TTS',
+    album: 'Drive Reader',
+  };
+}
+
 export function createSpeechController(handlers: SpeechControllerHandlers) {
   let runId = 0;
+  let currentPlayer: PlaybackPlayer | null = null;
+  let currentSubscription: { remove: () => void } | null = null;
+
+  const releasePlayer = async () => {
+    currentSubscription?.remove();
+    currentSubscription = null;
+
+    if (!currentPlayer) {
+      return;
+    }
+
+    try {
+      currentPlayer.clearLockScreenControls();
+    } catch {
+      // Ignore lock-screen cleanup failures.
+    }
+
+    try {
+      currentPlayer.pause();
+    } catch {
+      // Ignore pause failures during teardown.
+    }
+
+    try {
+      currentPlayer.remove();
+    } catch {
+      // Ignore dispose failures during teardown.
+    }
+
+    currentPlayer = null;
+  };
 
   const stop = async () => {
     runId += 1;
-    await Speech.stop();
+
+    await stopLocalTts();
+    await releasePlayer();
+    await clearLocalTts();
+
     handlers.onStatus('Speech stopped.');
   };
 
-  const speak = async (input: string) => {
+  const speakWithExpoSpeech = async (input: string) => {
     const content = input.trim();
     if (!content) {
       handlers.onStatus('Type or load some text before speaking.');
@@ -149,6 +203,87 @@ export function createSpeechController(handlers: SpeechControllerHandlers) {
         handlers.onError(message);
       }
     }
+  };
+
+  const speakWithLocalAudio = async (input: string) => {
+    const content = input.trim();
+    if (!content) {
+      handlers.onStatus('Type or load some text before speaking.');
+      return;
+    }
+
+    const currentRun = ++runId;
+
+    await stopLocalTts();
+    await releasePlayer();
+    await clearLocalTts();
+
+    try {
+      handlers.onStatus('Preparing local audio.');
+      const audio = await synthesizeLocalTts({
+        text: content,
+        rate: 0.96,
+        pitch: 1,
+        language: 'en-US',
+      });
+
+      if (currentRun !== runId) {
+        return;
+      }
+
+      const player = createAudioPlayer(audio.uri, {
+        keepAudioSessionActive: true,
+      });
+      currentPlayer = player;
+      currentSubscription = player.addListener('playbackStatusUpdate', async (status) => {
+        if (currentRun !== runId) {
+          return;
+        }
+
+        if (status.isBuffering) {
+          handlers.onStatus('Loading audio.');
+          return;
+        }
+
+        if (status.playing) {
+          handlers.onStatus('Speaking now.');
+          return;
+        }
+
+        if (status.didJustFinish) {
+          await releasePlayer();
+          await clearLocalTts();
+          if (currentRun === runId) {
+            handlers.onStatus('Finished speaking.');
+          }
+        }
+      });
+
+      try {
+        player.setActiveForLockScreen(true, getLockScreenMetadata());
+      } catch {
+        // The player still works without lock-screen activation.
+      }
+
+      player.play();
+      handlers.onStatus('Speaking now.');
+    } catch (error) {
+      if (currentRun === runId) {
+        const message = error instanceof Error ? error.message : 'Speech failed to start.';
+        handlers.onError(message);
+      }
+      await releasePlayer();
+      await clearLocalTts();
+    }
+  };
+
+  const speak = async (input: string) => {
+    if (Platform.OS === 'android' && isLocalTtsAvailable()) {
+      await speakWithLocalAudio(input);
+      return;
+    }
+
+    await speakWithExpoSpeech(input);
   };
 
   return { speak, stop };

@@ -6,11 +6,12 @@ Let the app continue playback in the background and expose play/stop controls fr
 
 ## Current State
 
-- The app still uses `expo-speech` for text-to-speech.
-- Playback control is isolated behind `services/speech-controller.ts`.
-- The UI calls a single speech controller boundary instead of talking to `expo-speech` directly.
+- The app uses a speech controller boundary in `services/speech-controller.ts`.
+- On Android, the controller now prefers the local TTS native module and feeds the result into `expo-audio`.
+- On unsupported platforms, the controller still falls back to `expo-speech`.
 - `expo-audio` is installed and the app config enables background playback.
-- The root layout now initializes the audio session with background playback enabled.
+- The root layout initializes the audio session with background playback enabled.
+- Lock-screen registration is enabled on the audio player path.
 
 ## Important Constraint
 
@@ -19,10 +20,10 @@ Let the app continue playback in the background and expose play/stop controls fr
 
 ## Recommended Path
 
-1. Replace the current speech implementation with an audio-backed playback pipeline.
-2. Use `expo-audio` for background playback once speech audio is available as a real audio source.
-3. Configure background audio support for Android and iOS.
-4. Wire play / stop actions into the system media controls after the player is stable.
+1. Keep the speech controller boundary in place.
+2. Use the Android local TTS module as the first real audio source.
+3. Mirror the same contract on iOS when an iOS project is available.
+4. Keep `expo-audio` as the playback layer for background audio and lock-screen controls.
 
 ## References
 
@@ -31,5 +32,5 @@ Let the app continue playback in the background and expose play/stop controls fr
 
 ## Next Implementation Step
 
-- Build the local TTS source as a native module so it can emit audio for `expo-audio` playback.
-- After that, wire play / pause / stop into the audio player and lock-screen controls.
+- Harden the Android local TTS module and verify it in a device build.
+- After that, complete the iOS implementation when the iOS project is generated.

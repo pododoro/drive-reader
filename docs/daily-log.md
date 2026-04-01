@@ -30,6 +30,7 @@ Purpose: capture one concise entry per workday so the next agent can reconstruct
 - Done: Started the background-audio migration by isolating speech control behind `services/speech-controller.ts` and documenting the `expo-audio` path in `docs/background-audio-migration.md`.
 - Done: Installed `expo-audio`, enabled background playback in app config, and initialized the audio session at app start.
 - Done: Added Android, iOS, and player integration plans for the local TTS path, plus a shared `services/local-tts.ts` contract for the upcoming native module.
+- Done: Added an Android local TTS native module, wired the speech controller to prefer local audio on Android, and added an iOS source scaffold for the same contract.
 - Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. The workflow QA smoke test passed with `npm run qa:workflow` against the local web build, and `npm run lint` / `npx tsc --noEmit` remained clean.
-- Blocked: The app still uses `expo-speech`, so notification or lock-screen controls will require a native local TTS module to supply audio playback.
-- Next: Build the Android native TTS module first, mirror the interface on iOS, then connect both to `expo-audio`.
+- Blocked: Android native background playback still needs a device build to verify the new module end to end, and iOS still needs a generated project before the scaffold can be wired in.
+- Next: Run a device build for Android, then finish the iOS implementation once the iOS project exists.

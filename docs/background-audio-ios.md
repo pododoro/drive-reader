@@ -23,8 +23,10 @@ Generate speech audio locally on iOS, keep playback alive in the background, and
 - iOS already supports background audio when the session is configured correctly.
 - The app should preserve the current text and playback state if it returns to foreground.
 - Pause and resume are enough for most lock-screen flows; stop should clear the current audio source.
+- A source scaffold now exists at `ios/LocalTtsModule.swift`, but the iOS project itself is not generated in this repository yet.
 
 ## Open Questions
 
 - Whether the native iOS TTS module should write a temporary file or stream directly.
 - How to expose voice selection consistently with Android.
+- When to generate the iOS project so the scaffold can be wired into the real target.

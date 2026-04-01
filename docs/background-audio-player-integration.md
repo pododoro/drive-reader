@@ -6,8 +6,8 @@ Connect the local TTS output to `expo-audio` so the app can use background playb
 
 ## Integration Shape
 
-- `services/local-tts.ts` defines the native TTS contract.
-- `services/speech-controller.ts` becomes the orchestration layer for the UI.
+- `services/local-tts.ts` defines the native TTS contract and platform availability.
+- `services/speech-controller.ts` orchestrates synthesis, playback, cleanup, and fallback behavior.
 - `expo-audio` owns playback, lock-screen registration, and background audio behavior.
 
 ## Implementation Steps
@@ -19,15 +19,15 @@ Connect the local TTS output to `expo-audio` so the app can use background playb
    - `Speak` -> synthesize and play
    - `Stop` -> pause or stop
    - optional future `Pause` / `Resume`
-5. Clear lock-screen controls when playback ends or stops.
+5. Clear lock-screen controls and temporary audio files when playback ends or stops.
 
 ## Constraints
 
-- The current app still uses `expo-speech`, so this document is the migration target.
+- The controller still falls back to `expo-speech` when the native path is unavailable.
 - `expo-audio` is ready for the playback side, but it needs real audio output from the native TTS engine.
 
 ## Suggested Order
 
-1. Build the Android local TTS module.
-2. Mirror the same interface on iOS.
-3. Swap the speech controller from `expo-speech` to `expo-audio`.
+1. Harden the Android local TTS module and verify it in a device build.
+2. Mirror the same interface on iOS when the project is generated.
+3. Keep the speech controller as the single orchestration layer for both platforms.

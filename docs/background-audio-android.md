@@ -6,9 +6,9 @@ Generate speech audio locally on Android, keep playback alive in the background,
 
 ## Required Pieces
 
-- A native speech synthesis module that returns an audio source URI or streamable file.
-- A foreground media playback service for sustained background playback.
+- A native speech synthesis module that writes generated speech into a cache file.
 - `expo-audio` as the playback layer that owns the audio session and lock-screen controls.
+- A stable cleanup path for temporary speech files after playback ends or stops.
 
 ## Playback Flow
 
@@ -21,11 +21,12 @@ Generate speech audio locally on Android, keep playback alive in the background,
 ## Android Notes
 
 - Background playback needs the config plugin already added to the app config.
-- The native module should write generated speech to a cache file if the TTS engine cannot stream directly.
-- The player should expose `play`, `pause`, `resume`, and `stop`.
-- Notification controls should map to those player actions.
+- The native module now lives in `android/app/src/main/java/com/anonymous/drivereader/LocalTtsModule.kt`.
+- The package is registered manually in `MainApplication.kt`.
+- The player path now sets lock-screen metadata before playback.
+- Notification controls should map to the audio player actions.
 
 ## Open Questions
 
-- Whether the Android TTS engine can emit a file directly or needs a cache-file bridge.
-- Whether the voice selection should stay app-level or be exposed from the native module.
+- Whether the Android TTS engine needs per-request queueing for longer text blocks.
+- Whether voice selection should stay app-level or be exposed from the native module.

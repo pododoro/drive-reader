@@ -26,6 +26,9 @@ Last updated: 2026-04-01
 - iOS-specific local TTS planning now lives in `docs/background-audio-ios.md`.
 - `expo-audio` integration notes now live in `docs/background-audio-player-integration.md`.
 - `expo-audio` is installed and the app is configured for background playback.
+- Android now has a local TTS native module at `android/app/src/main/java/com/anonymous/drivereader/LocalTtsModule.kt`.
+- The speech controller uses the Android local TTS path first and falls back to `expo-speech` elsewhere.
+- An iOS source scaffold exists at `ios/LocalTtsModule.swift`, but the iOS project is not generated in this repository yet.
 
 ## Current Risks
 
@@ -43,11 +46,13 @@ Last updated: 2026-04-01
    - `npm run qa:workflow`
 4. Keep workflow QA aligned with the current UI and interaction model.
 5. Finish the speech-controller boundary and implement the local TTS native module that can feed `expo-audio`.
-6. Keep the native plan aligned across Android, iOS, and the player integration docs.
-7. Tighten the Naver extraction flow if live pages drift.
-8. Keep daily progress in `docs/daily-log.md` after each work session.
-9. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
-10. Use `docs/testing-strategy.md` to decide when web QA is enough and when native verification is needed.
+5. Harden the Android local TTS native module and verify it in a device build.
+6. Bring the iOS implementation in once the iOS project is generated.
+7. Keep the native plan aligned across Android, iOS, and the player integration docs.
+8. Tighten the Naver extraction flow if live pages drift.
+9. Keep daily progress in `docs/daily-log.md` after each work session.
+10. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
+11. Use `docs/testing-strategy.md` to decide when web QA is enough and when native verification is needed.
 
 ## Reporting Standard
 
