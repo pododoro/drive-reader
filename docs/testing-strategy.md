@@ -55,9 +55,15 @@ Run this scenario on an installed Android dev client whenever the playback stack
 - Evaluate Detox against the installed dev client for notification and background playback assertions.
 - If notification-level assertions are unstable in Detox, add an Appium path for Android system UI checks.
 
+## Current Decision
+
+- Keep Android background playback QA as a manual device check for now.
+- Do not add Detox or Appium yet.
+- Revisit native automation only if Android playback regressions become frequent enough to justify the setup and maintenance cost.
+
 ## Recommended Path
 
 - Keep `qa:workflow` as the fast smoke test.
 - Use Expo Go for manual QA on gestures, keyboard behavior, and native file/share flows.
 - Use the Android device QA scenario above after changes to local TTS, `expo-audio`, or Android manifest playback wiring.
-- Add native automation only after the UI stabilizes enough to justify the setup cost.
+- Keep Android background playback verification manual until that cost changes.

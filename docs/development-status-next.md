@@ -30,6 +30,7 @@ Last updated: 2026-04-01
 - The speech controller uses the Android local TTS path first and falls back to `expo-speech` elsewhere.
 - Android manifest playback wiring is now fixed in `android/app/src/main/AndroidManifest.xml` with the media playback foreground service and related permissions.
 - Android dev-client verification now confirms background playback, lock-screen controls, stop/resume controls, and playback continuity while locked or while other apps are open.
+- Android background playback QA is currently a manual device verification step; Detox/Appium is intentionally deferred.
 - An iOS source scaffold exists at `ios/LocalTtsModule.swift`, but the iOS project is not generated in this repository yet.
 - Android builds require JDK 17 in this environment; JDK 25 caused a Gradle class file version mismatch during `expo run:android`.
 - Android settings.gradle now uses explicit includeBuild paths and no longer sets an unsupported `projectRoot` on ReactSettingsExtension.
@@ -58,7 +59,7 @@ Last updated: 2026-04-01
 10. Keep daily progress in `docs/daily-log.md` after each work session.
 11. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
 12. Use `docs/testing-strategy.md` to decide when web QA is enough and when native verification is needed.
-13. Decide whether native Android playback verification should remain manual or move into Detox/Appium.
+13. Revisit Detox/Appium only if Android playback regressions become frequent enough to justify native system-UI automation.
 
 ## Reporting Standard
 
