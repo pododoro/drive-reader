@@ -51,6 +51,8 @@ type RecentSource = {
   hint: string;
 };
 
+type InputMode = 'file' | 'naver' | 'website';
+
 function firstValue(value: string | string[] | undefined) {
   if (Array.isArray(value)) {
     return value[0];
@@ -157,6 +159,28 @@ function applyRecentSource(
 
   setText(source.value);
   setStatus(`Restored ${source.kind} input from recent history.`);
+}
+
+function InputModeButton({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.modeChip,
+        active && styles.modeChipActive,
+        pressed && styles.buttonPressed,
+      ]}>
+      <Text style={[styles.modeChipLabel, active && styles.modeChipLabelActive]}>{label}</Text>
+    </Pressable>
+  );
 }
 
 function normalizeText(text: string) {
@@ -1170,6 +1194,7 @@ export default function HomeScreen() {
   const [text, setText] = useState(SAMPLE_TEXT);
   const [manualFileUri, setManualFileUri] = useState('');
   const [blogUrl, setBlogUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<ShareIntentFile | null>(null);
   const [sharedFiles, setSharedFiles] = useState<FileCard[]>([]);
   const [recentSources, setRecentSources] = useState<RecentSource[]>([]);
@@ -1177,6 +1202,7 @@ export default function HomeScreen() {
   const [isBusy, setIsBusy] = useState(false);
   const [isBlogBusy, setIsBlogBusy] = useState(false);
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [inputMode, setInputMode] = useState<InputMode>('file');
 
   const [blogSnapshot, setBlogSnapshot] = useState<{
     title: string;
@@ -1652,6 +1678,65 @@ export default function HomeScreen() {
     }
   };
 
+  const loadWebsiteText = async () => {
+    const url = websiteUrl.trim();
+    if (!url) {
+      setStatus('Enter a website URL first.');
+      return;
+    }
+
+    setIsBusy(true);
+    try {
+      const normalizedUrl = normalizeUrl(url);
+      const html = await fetchHtml(normalizedUrl);
+      const title = extractTitleFromHtml(html);
+      const body = normalizeText(stripHtmlToText(html));
+      const textSnapshot = normalizeBlogBodyText(body) || body;
+
+      if (!textSnapshot) {
+        throw new Error('Could not extract readable text from the website.');
+      }
+
+      const snapshotName = `${safeFileName(title)}-${Date.now()}.txt`;
+      const snapshotFile = new File(Paths.cache, snapshotName);
+      snapshotFile.write(textSnapshot);
+
+      const file: ShareIntentFile = {
+        fileName: snapshotName,
+        mimeType: 'text/plain',
+        path: snapshotFile.uri,
+        size: textSnapshot.length,
+        width: null,
+        height: null,
+        duration: null,
+      };
+
+      setSharedFiles([
+        {
+          file,
+          preview: textSnapshot,
+          note: `Extracted from ${normalizedUrl}`,
+        },
+      ]);
+      setSelectedFile(file);
+      setManualFileUri(snapshotFile.uri);
+      setText(textSnapshot);
+      setBlogSnapshot({
+        title,
+        text: textSnapshot,
+        uri: snapshotFile.uri,
+      });
+      rememberRecentSource(setRecentSources, 'url', `Website ${title}`, normalizedUrl, 'Extracted content');
+      setStatus(`Loaded website body from ${title}.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to extract the website text.';
+      setStatus(message);
+      Alert.alert('Drive Reader', message);
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
 
@@ -1698,8 +1783,19 @@ export default function HomeScreen() {
             {isBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
           </View>
 
-          <View style={styles.inputStack}>
-            <View style={styles.inputStackItem}>
+          <Text style={[styles.helperText, dark && styles.textMuted]}>
+            Choose one input type first. The matching card appears below.
+          </Text>
+
+          <View style={styles.modeRow}>
+            <InputModeButton label="Internal file" active={inputMode === 'file'} onPress={() => setInputMode('file')} />
+            <InputModeButton label="Naver blog" active={inputMode === 'naver'} onPress={() => setInputMode('naver')} />
+            <InputModeButton label="Website" active={inputMode === 'website'} onPress={() => setInputMode('website')} />
+          </View>
+
+          {inputMode === 'file' ? (
+            <View style={styles.inputPanel}>
+              <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Internal file</Text>
               <Text style={[styles.helperText, dark && styles.textMuted]}>
                 Pick a local file, paste a file path, or open a deep link.
               </Text>
@@ -1732,10 +1828,13 @@ export default function HomeScreen() {
                 />
               </View>
             </View>
+          ) : null}
 
-            <View style={styles.inputStackItem}>
+          {inputMode === 'naver' ? (
+            <View style={styles.inputPanel}>
+              <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Naver blog</Text>
               <Text style={[styles.helperText, dark && styles.textMuted]}>
-                Paste a Naver blog URL if the content you want is on the web.
+                Paste a Naver blog URL, extract the post body, then save or share it.
               </Text>
               <TextInput
                 value={blogUrl}
@@ -1773,7 +1872,49 @@ export default function HomeScreen() {
                 />
               </View>
             </View>
-          </View>
+          ) : null}
+
+          {inputMode === 'website' ? (
+            <View style={styles.inputPanel}>
+              <Text style={[styles.inputPanelTitle, dark && styles.textLight]}>Website</Text>
+              <Text style={[styles.helperText, dark && styles.textMuted]}>
+                Paste a normal website URL. Drive Reader will extract readable text from the page.
+              </Text>
+              <TextInput
+                value={websiteUrl}
+                onChangeText={setWebsiteUrl}
+                placeholder="https://example.com/article"
+                placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={[styles.singleLineInput, dark && styles.textInputDark]}
+              />
+              <View style={styles.fileReaderActions}>
+                <ActionButton
+                  label="Read website"
+                  icon={<Link2 size={16} color="#FFFFFF" />}
+                  onPress={loadWebsiteText}
+                />
+                <ActionButton
+                  label="Clear"
+                  icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={() => setWebsiteUrl('')}
+                  variant="secondary"
+                />
+                <ActionButton
+                  label="Save"
+                  icon={<Square size={16} color="#FFFFFF" />}
+                  onPress={saveBlogSnapshot}
+                />
+                <ActionButton
+                  label="Share"
+                  icon={<Share2 size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={shareBlogSnapshot}
+                  variant="ghost"
+                />
+              </View>
+            </View>
+          ) : null}
         </View>
 
         <View style={[styles.card, dark && styles.cardDark]}>
@@ -1782,12 +1923,13 @@ export default function HomeScreen() {
               <Volume2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
               <Text style={[styles.sectionTitle, dark && styles.textLight]}>Confirm it</Text>
             </View>
-            <ActionButton
-              label={isPreviewExpanded ? 'Collapse' : 'Expand'}
-              icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+            <Pressable
               onPress={() => setIsPreviewExpanded((value) => !value)}
-              variant="ghost"
-            />
+              style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
+              <Text style={styles.expandButtonLabel}>
+                {isPreviewExpanded ? 'Collapse' : 'Expand'}
+              </Text>
+            </Pressable>
           </View>
 
           <Text style={[styles.helperText, dark && styles.textMuted]}>
@@ -2021,6 +2163,55 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+  },
+  expandButton: {
+    borderRadius: 999,
+    backgroundColor: '#0F172A',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  expandButtonLabel: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  modeRow: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  modeChip: {
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
+  modeChipActive: {
+    backgroundColor: '#0F172A',
+    borderColor: '#0F172A',
+  },
+  modeChipLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  modeChipLabelActive: {
+    color: '#FFFFFF',
+  },
+  inputPanel: {
+    gap: 12,
+    borderRadius: 18,
+    padding: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
+  inputPanelTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
   },
   statsRow: {
     flexDirection: 'row',
@@ -2273,10 +2464,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     padding: 16,
     gap: 10,
-    maxHeight: 180,
+    height: 150,
   },
   readerBoxExpanded: {
-    maxHeight: 320,
+    height: 300,
   },
   readerBoxDark: {
     backgroundColor: '#081423',
@@ -2297,7 +2488,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   readerScroll: {
-    maxHeight: 260,
+    flex: 1,
   },
   readerScrollContent: {
     paddingBottom: 6,
