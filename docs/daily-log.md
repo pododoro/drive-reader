@@ -27,6 +27,7 @@ Purpose: capture one concise entry per workday so the next agent can reconstruct
 - Context: Baseline setup, documentation handoff, and GitHub version control initialization.
 - Done: Created the first stable commit, connected the repository to GitHub, merged the remote initial commit history, and added the working docs for daily logs, status tracking, and product planning.
 - Done: Added workflow QA automation, GitHub Actions CI wiring, and a testing strategy document for web QA versus native Expo Go verification.
+- Done: Started the background-audio migration by isolating speech control behind `services/speech-controller.ts` and documenting the `expo-audio` path in `docs/background-audio-migration.md`.
 - Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. The workflow QA smoke test passed with `npm run qa:workflow` against the local web build, and `npm run lint` / `npx tsc --noEmit` remained clean.
-- Blocked: No immediate blocker. Future work still depends on keeping the Naver extraction checks healthy as the source pages change.
-- Next: Keep the workflow QA coverage aligned with the UI, and add native automation only if Expo Go manual checks stop being sufficient.
+- Blocked: No immediate blocker. The app still uses `expo-speech`, so notification or lock-screen controls will require the next playback-engine step.
+- Next: Replace the speech backend with an audio-backed source that can be used with `expo-audio` and background controls.

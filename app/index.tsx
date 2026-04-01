@@ -20,7 +20,6 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import { type ShareIntentFile, useShareIntentContext } from 'expo-share-intent';
 import * as Linking from 'expo-linking';
-import * as Speech from 'expo-speech';
 import {
   FileAudio,
   FileText,
@@ -33,6 +32,8 @@ import {
   Volume2,
   Video,
 } from 'lucide-react-native';
+import { createSpeechController } from '../services/speech-controller';
+import * as Speech from 'expo-speech';
 
 const SAMPLE_TEXT =
   'Drive Reader turns text, shared links, and text files into spoken audio so you can keep your eyes on the road.';
@@ -910,6 +911,7 @@ async function extractNaverBlogText(inputUrl: string) {
   throw new Error('Could not resolve the blog content.');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function splitTextForSpeech(input: string, maxChunkLength = 3800) {
   const normalized = input.replace(/\r\n/g, '\n').trim();
   if (!normalized) {
@@ -1064,6 +1066,7 @@ function StatPill({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function FileRow({
   card,
   dark,
@@ -1110,7 +1113,6 @@ function FileRow({
 export default function HomeScreen() {
   const dark = false;
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
-  const speechRunIdRef = useRef(0);
 
   const [text, setText] = useState(SAMPLE_TEXT);
   const [manualFileUri, setManualFileUri] = useState('');
@@ -1122,6 +1124,7 @@ export default function HomeScreen() {
   const [isBusy, setIsBusy] = useState(false);
   const [isEditTextExpanded, setIsEditTextExpanded] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>('file');
+  const speechControllerRef = useRef<ReturnType<typeof createSpeechController> | null>(null);
 
   const [blogSnapshot, setBlogSnapshot] = useState<{
     title: string;
@@ -1139,6 +1142,16 @@ export default function HomeScreen() {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
   }, []);
+
+  if (!speechControllerRef.current) {
+    speechControllerRef.current = createSpeechController({
+      onStatus: setStatus,
+      onError: (message) => {
+        setStatus(message);
+        Alert.alert('Drive Reader', message);
+      },
+    });
+  }
 
   useEffect(() => {
     let alive = true;
@@ -1293,67 +1306,11 @@ export default function HomeScreen() {
   }, [hasShareIntent, resetShareIntent, shareIntent]);
 
   const speakText = async () => {
-    const content = text.trim();
-    if (!content) {
-      setStatus('Type or load some text before speaking.');
-      return;
-    }
-
-    await Speech.stop();
-    const chunks = splitTextForSpeech(content);
-    if (!chunks.length) {
-      setStatus('Type or load some text before speaking.');
-      return;
-    }
-
-    const runId = ++speechRunIdRef.current;
-    const total = chunks.length;
-    const speakChunk = (chunk: string, index: number) =>
-      new Promise<void>((resolve, reject) => {
-        Speech.speak(chunk, {
-          rate: 0.96,
-          pitch: 1.0,
-          onStart: () => {
-            if (runId === speechRunIdRef.current) {
-              setStatus(`Speaking part ${index + 1} of ${total}.`);
-            }
-          },
-          onDone: () => resolve(),
-          onStopped: () => resolve(),
-          onError: () => reject(new Error('Speech failed to start.')),
-        });
-      });
-
-    try {
-      if (total === 1) {
-        setStatus('Speaking now.');
-      } else {
-        setStatus(`Speaking long text in ${total} parts.`);
-      }
-
-      for (let i = 0; i < chunks.length; i += 1) {
-        if (runId !== speechRunIdRef.current) {
-          return;
-        }
-        await speakChunk(chunks[i], i);
-      }
-
-      if (runId === speechRunIdRef.current) {
-        setStatus('Finished speaking.');
-      }
-    } catch (error) {
-      if (runId === speechRunIdRef.current) {
-        const message = error instanceof Error ? error.message : 'Speech failed to start.';
-        setStatus(message);
-        Alert.alert('Drive Reader', message);
-      }
-    }
+    await speechControllerRef.current?.speak(text);
   };
 
   const stopSpeech = async () => {
-    speechRunIdRef.current += 1;
-    await Speech.stop();
-    setStatus('Speech stopped.');
+    await speechControllerRef.current?.stop();
   };
 
   const loadFile = async () => {
