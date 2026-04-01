@@ -35,6 +35,7 @@ Purpose: capture one concise entry per workday so the next agent can reconstruct
 - Done: Added the Android media playback foreground service and related permissions to the native manifest so `expo-audio` lock-screen controls can bind correctly in the dev-client build.
 - Done: Verified on a physical Android device that background playback keeps running, the system playback card appears, and system stop/resume controls work while locked and while other apps are open.
 - Done: Updated the testing strategy with a concrete Android device QA scenario and a native automation backlog for future Detox/Appium coverage.
+- Done: Added a short Android dev-client build and run procedure to `README.md` so the native playback path can be re-run without reconstructing the terminal steps.
 - Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. The workflow QA smoke test passed with `npm run qa:workflow` against the local web build, and `npm run lint` / `npx tsc --noEmit` remained clean.
 - Verified: `gradlew.bat app:assembleDebug` completed successfully with JDK 17, `adb install -r app\build\outputs\apk\debug\app-debug.apk` completed successfully, and manual Android device QA passed for background playback and system controls.
 - Blocked: iOS still needs a generated project before the local TTS scaffold can be wired and verified there.
