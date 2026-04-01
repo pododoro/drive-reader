@@ -1785,6 +1785,12 @@ export default function HomeScreen() {
               />
               <View style={styles.fileReaderActions}>
                 <ActionButton
+                  label="Reset URL"
+                  icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={() => setBlogUrl('')}
+                  variant="secondary"
+                />
+                <ActionButton
                   label="Extract"
                   icon={<Link2 size={16} color="#FFFFFF" />}
                   onPress={loadBlogText}
