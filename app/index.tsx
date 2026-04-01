@@ -47,14 +47,6 @@ type FileCard = {
   note: string;
 };
 
-type RecentSource = {
-  id: string;
-  kind: 'text' | 'file' | 'url';
-  label: string;
-  value: string;
-  hint: string;
-};
-
 type InputMode = 'file' | 'naver' | 'website';
 
 function firstValue(value: string | string[] | undefined) {
@@ -102,52 +94,6 @@ function formatBytes(value: number | null) {
   }
 
   return `${(kb / 1024).toFixed(1)} MB`;
-}
-
-function makeRecentSourceId(kind: RecentSource['kind'], value: string) {
-  return `${kind}:${value}`;
-}
-
-function rememberRecentSource(
-  setRecentSources: any,
-  kind: RecentSource['kind'],
-  label: string,
-  value: string,
-  hint: string
-) {
-  const trimmedValue = value.trim();
-  if (!trimmedValue) {
-    return;
-  }
-
-  const source: RecentSource = {
-    id: makeRecentSourceId(kind, trimmedValue),
-    kind,
-    label,
-    value: trimmedValue,
-    hint,
-  };
-
-  setRecentSources((current: RecentSource[]) => {
-    const next = [source, ...current.filter((item: RecentSource) => item.id !== source.id)];
-    return next.slice(0, 5);
-  });
-}
-
-function applyRecentSource(
-  setManualFileUri: any,
-  setText: any,
-  setStatus: any,
-  source: RecentSource
-) {
-  if (source.kind === 'file') {
-    setManualFileUri(source.value);
-    setStatus('Restored file path from recent history.');
-    return;
-  }
-
-  setText(source.value);
-  setStatus(`Restored ${source.kind} input from recent history.`);
 }
 
 function InputModeButton({
@@ -1109,26 +1055,6 @@ function ActionButton({
   );
 }
 
-function SourceChip({
-  source,
-  onPress,
-}: {
-  source: RecentSource;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.sourceChip, pressed && styles.buttonPressed]}>
-      <Text style={styles.sourceChipKind}>{source.kind.toUpperCase()}</Text>
-      <Text style={styles.sourceChipLabel} numberOfLines={1}>
-        {source.label}
-      </Text>
-      <Text style={styles.sourceChipHint} numberOfLines={1}>
-        {source.hint}
-      </Text>
-    </Pressable>
-  );
-}
-
 function StatPill({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <View style={styles.statPill}>
@@ -1192,7 +1118,6 @@ export default function HomeScreen() {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<ShareIntentFile | null>(null);
   const [sharedFiles, setSharedFiles] = useState<FileCard[]>([]);
-  const [recentSources, setRecentSources] = useState<RecentSource[]>([]);
   const [status, setStatus] = useState('Ready for text, file URIs, deep links, and share intents.');
   const [isBusy, setIsBusy] = useState(false);
   const [isEditTextExpanded, setIsEditTextExpanded] = useState(false);
@@ -1231,21 +1156,18 @@ export default function HomeScreen() {
 
       if (incomingText) {
         setText(incomingText);
-        rememberRecentSource(setRecentSources, 'text', 'Deep link text', incomingText, 'From initial URL');
         setStatus('Loaded text from the deep link.');
         return;
       }
 
       if (incomingUrl) {
         setText(incomingUrl);
-        rememberRecentSource(setRecentSources, 'url', 'Deep link URL', incomingUrl, 'Ready to read');
         setStatus('Loaded URL from the deep link.');
         return;
       }
 
       if (incomingFile) {
         setManualFileUri(incomingFile);
-        rememberRecentSource(setRecentSources, 'file', 'Deep link file URI', incomingFile, 'Ready for file loading');
         setStatus('Loaded file URI from the deep link.');
       }
     };
@@ -1260,21 +1182,18 @@ export default function HomeScreen() {
 
       if (incomingText) {
         setText(incomingText);
-        rememberRecentSource(setRecentSources, 'text', 'Incoming text', incomingText, 'From app link');
         setStatus('Loaded text from an incoming deep link.');
         return;
       }
 
       if (incomingUrl) {
         setText(incomingUrl);
-        rememberRecentSource(setRecentSources, 'url', 'Incoming URL', incomingUrl, 'From app link');
         setStatus('Loaded URL from an incoming deep link.');
         return;
       }
 
       if (incomingFile) {
         setManualFileUri(incomingFile);
-        rememberRecentSource(setRecentSources, 'file', 'Incoming file URI', incomingFile, 'From app link');
         setStatus('Loaded file URI from an incoming deep link.');
       }
     });
@@ -1311,7 +1230,6 @@ export default function HomeScreen() {
               try {
                 preview = await readTextFromFileUri(file.path);
                 note = `Text content loaded from ${file.fileName}.`;
-                rememberRecentSource(setRecentSources, 'file', `Shared file ${file.fileName}`, file.path, 'Tap to reload');
               } catch (error) {
                 note =
                   error instanceof Error
@@ -1331,16 +1249,13 @@ export default function HomeScreen() {
             const firstTextPreview = cards.find((card) => card.preview)?.preview ?? '';
             if (firstTextPreview) {
               setText(firstTextPreview);
-              rememberRecentSource(setRecentSources, 'text', 'Shared text file', firstTextPreview, 'From share intent');
             }
             setStatus(`Loaded ${textFiles.length} text file(s) from sharing.`);
           } else if (shareIntent.text) {
             setText(shareIntent.text);
-            rememberRecentSource(setRecentSources, 'text', 'Shared text', shareIntent.text, 'From share intent');
             setStatus('Loaded shared text.');
           } else if (shareIntent.webUrl) {
             setText(shareIntent.webUrl);
-            rememberRecentSource(setRecentSources, 'url', 'Shared web link', shareIntent.webUrl, 'From share intent');
             setStatus('Loaded a shared web link.');
           } else {
             setStatus(`Received ${shareIntent.files.length} shared file(s).`);
@@ -1350,14 +1265,12 @@ export default function HomeScreen() {
           setSelectedFile(null);
           setManualFileUri('');
           setText(shareIntent.webUrl);
-          rememberRecentSource(setRecentSources, 'url', 'Shared web link', shareIntent.webUrl, 'From share intent');
           setStatus('Loaded a shared web link.');
         } else if (shareIntent.text) {
           setSharedFiles([]);
           setSelectedFile(null);
           setManualFileUri('');
           setText(shareIntent.text);
-          rememberRecentSource(setRecentSources, 'text', 'Shared text', shareIntent.text, 'From share intent');
           setStatus('Loaded shared text.');
         }
       } catch (error) {
@@ -1466,7 +1379,6 @@ export default function HomeScreen() {
       setSharedFiles([{ file, preview: content, note: 'Loaded from the local file system.' }]);
       setSelectedFile(file);
       setText(content);
-      rememberRecentSource(setRecentSources, 'file', `Local file ${file.fileName}`, file.path, 'From local filesystem');
       setStatus('Loaded file from the local file system.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to read the file.';
@@ -1545,7 +1457,6 @@ export default function HomeScreen() {
       ]);
       setSelectedFile(file);
       setManualFileUri(snapshotFile.uri);
-      rememberRecentSource(setRecentSources, 'file', `Blog snapshot ${snapshotName}`, snapshotFile.uri, 'Saved to cache');
       setStatus(`Saved blog snapshot as ${snapshotName}.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to save the blog snapshot.';
@@ -1617,7 +1528,6 @@ export default function HomeScreen() {
       ]);
       setSelectedFile(file);
       setManualFileUri(snapshotFile.uri);
-      rememberRecentSource(setRecentSources, 'url', `Naver blog ${result.title}`, url, 'Extracted content');
         setBlogSnapshot({
           title: result.title,
           text: result.text,
@@ -1678,7 +1588,6 @@ export default function HomeScreen() {
       setSelectedFile(file);
       setManualFileUri(asset.uri);
       setText(content);
-      rememberRecentSource(setRecentSources, 'file', `Picked file ${asset.name}`, asset.uri, 'From system picker');
       setStatus(`Loaded ${asset.name} from the system file chooser.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to pick a file.';
@@ -1735,7 +1644,6 @@ export default function HomeScreen() {
         text: textSnapshot,
         uri: snapshotFile.uri,
       });
-      rememberRecentSource(setRecentSources, 'url', `Website ${title}`, normalizedUrl, 'Extracted content');
       setStatus(`Loaded website body from ${title}.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to extract the website text.';
@@ -2049,46 +1957,6 @@ export default function HomeScreen() {
             )}
           </View>
         </View>
-
-        {recentSources.length > 0 ? (
-          <View style={[styles.card, dark && styles.cardDark]}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <RotateCcw size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Recent inputs</Text>
-              </View>
-            </View>
-            <Text style={[styles.helperText, dark && styles.textMuted]}>
-              Tap a recent file path, shared text, or deep link to restore it into the main input.
-            </Text>
-            <View style={styles.sourceChipList}>
-              {recentSources.map((source) => (
-                <SourceChip
-                  key={source.id}
-                  source={source}
-                  onPress={() => applyRecentSource(setManualFileUri, setText, setStatus, source)}
-                />
-              ))}
-            </View>
-          </View>
-        ) : null}
-
-        {sharedFiles.length > 0 ? (
-          <View style={[styles.card, dark && styles.cardDark]}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Shared files</Text>
-              </View>
-            </View>
-
-            <View style={styles.sharedList}>
-              {sharedFiles.map((card) => (
-                <FileRow key={`${card.file.path}-${card.file.fileName}`} card={card} dark={dark} />
-              ))}
-            </View>
-          </View>
-        ) : null}
 
         <View style={[styles.card, dark && styles.cardDark]}>
           <View style={styles.sectionHeader}>
