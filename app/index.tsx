@@ -1671,7 +1671,7 @@ export default function HomeScreen() {
             <View style={styles.brandCopy}>
               <Text style={[styles.kicker, dark && styles.textSoft]}>Drive Reader</Text>
               <Text style={[styles.heroTitle, dark && styles.textLight]}>
-                Open, load, confirm, then read.
+                Load and read.
               </Text>
             </View>
             <Link href="/workflow" asChild>
@@ -1682,9 +1682,6 @@ export default function HomeScreen() {
               </Pressable>
             </Link>
           </View>
-          <Text style={[styles.heroBody, dark && styles.textMuted]}>
-            Keep the flow simple: put content in, check the preview, and only then press Speak.
-          </Text>
           <View style={styles.statsRow}>
             <StatPill icon={<Volume2 size={14} color="#0F172A" strokeWidth={2.5} />} label="TTS" />
             <StatPill
@@ -2022,7 +2019,7 @@ export default function HomeScreen() {
           <Text style={[styles.footerTitle, dark && styles.textLight]}>Quick test links</Text>
           <Text style={[styles.footerText, dark && styles.textMuted]}>
             `drivereader://?text=Hello` loads text. `drivereader://?file=file:///...` points at a
-            file. Shared text, URLs, and text files land here through `expo-share-intent`.
+            file. Use the `Speak` and `Stop` buttons in `Read it` after you confirm the text.
           </Text>
         </View>
       </ScrollView>
