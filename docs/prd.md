@@ -57,10 +57,14 @@ Users need a simple way to extract readable text from content sources that are a
 - Use GitHub for remote version control and collaboration.
 - Record daily progress in `docs/daily-log.md`.
 - Update `docs/development-status-next.md` whenever the roadmap or current status changes.
+- Keep `main` as the protected integration branch.
+- Develop on short-lived topic branches.
+- Open a pull request for every meaningful change set before merging to `main`.
+- Use PRs to preserve review context, test results, and release notes.
 
 ## Open Questions
 
 - Should the app support additional content sources beyond Naver and local files?
 - Should snapshots remain ephemeral or become a more structured local archive?
 - What is the target release cadence for GitHub-based milestones?
-
+- Should branch naming follow `feature/*`, `fix/*`, and `docs/*` conventions?

@@ -5,29 +5,29 @@ Last updated: 2026-04-01
 ## Current Status
 
 - Project name: `drive-reader`
-- Git branch: `master`
-- Commit history: none yet
-- Baseline: initial staged snapshot of the repository
-- Remote version control: GitHub connection not configured in the local repository yet
+- Git branch: `main`
+- Commit history: initialized
+- Baseline: first local commit plus GitHub remote history reconciled
+- Remote version control: configured and tracking `origin/main`
 
 ## What Exists Now
 
 - Expo Router app scaffold is present.
 - Naver blog extraction flow is implemented in `app/index.tsx`.
 - Supporting scripts exist for live and golden validation.
-- Validation is driven by the repository's own `scripts/`-based checks and does not yet have a committed docs or release workflow.
+- Validation is driven by the repository's own `scripts/`-based checks.
+- Project documentation now lives in `docs/` for daily logging, status tracking, and PRD planning.
 
 ## Current Risks
 
-- There is no commit history yet, so meaningful diff-based tracking starts only after the first commit.
-- There is no configured GitHub remote in the local repo, so push/release workflow is not ready yet.
-- Validation around Naver content depends on live page structure and may need ongoing maintenance.
+- The Naver extraction flow can drift when page structure changes.
+- Generated or fixture-based checks need periodic refresh when the upstream content changes.
 
 ## Next Development Plan
 
-1. Make the first commit as the baseline for all future work.
-2. Connect the repository to GitHub and confirm the default branch and remote workflow.
-3. Run the core checks for the current codebase:
+1. Keep work on short-lived topic branches.
+2. Open pull requests against `main` for any non-trivial change.
+3. Run the core checks for the current codebase before merging:
    - `npm run lint`
    - `npm run test:naver`
    - `npm run test:naver-live`
@@ -42,3 +42,11 @@ When you update this file, include:
 - What is now verified.
 - What remains risky or incomplete.
 - The next concrete step, written as an action.
+
+## Branch and PR Workflow
+
+- Use `main` as the stable integration branch.
+- Create a topic branch for feature work, fixes, or doc updates.
+- Keep each PR focused on one concern.
+- Prefer small PRs that can be reviewed and merged independently.
+- Update the daily log and status doc before merging when the change affects process, behavior, or roadmap.
