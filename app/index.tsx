@@ -1970,54 +1970,49 @@ export default function HomeScreen() {
           <View
             testID="confirm-body"
             style={[styles.confirmBody, !isConfirmDetailsExpanded && styles.confirmBodyCollapsed]}>
+            <Text style={[styles.helperText, dark && styles.textMuted]}>
+              Check the preview before you press Speak.
+            </Text>
+
             {isConfirmDetailsExpanded ? (
-              <>
-                <Text style={[styles.helperText, dark && styles.textMuted]}>
-                  Check the preview before you press Speak.
-                </Text>
-
-                <TextInput
-                  value={text}
-                  onChangeText={setText}
-                  testID="confirm-text-input"
-                  multiline
-                  scrollEnabled
-                  textAlignVertical="top"
-                  placeholder="Paste text here or load it from a share intent."
-                  placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
-                  style={[styles.textInput, dark && styles.textInputDark]}
-                />
-
-                <View style={styles.actionsWrap}>
-                  <ActionButton
-                    label="Load sample"
-                    icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                    onPress={() => setText(SAMPLE_TEXT)}
-                    variant="secondary"
-                  />
-                  <ActionButton
-                    label="Clear"
-                    icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                    onPress={clearTextOnly}
-                    variant="ghost"
-                  />
-                  <ActionButton
-                    label="Reset"
-                    icon={<Square size={16} color="#FFFFFF" />}
-                    onPress={resetAll}
-                  />
-                </View>
-              </>
+              <TextInput
+                value={text}
+                onChangeText={setText}
+                testID="confirm-text-input"
+                multiline
+                scrollEnabled
+                textAlignVertical="top"
+                placeholder="Paste text here or load it from a share intent."
+                placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                style={[styles.textInput, dark && styles.textInputDark]}
+              />
             ) : (
               <View style={styles.confirmSummary}>
-                <Text style={[styles.helperText, dark && styles.textMuted]}>
-                  Edit area collapsed. Reader stays visible below.
-                </Text>
                 <Text style={[styles.confirmSummaryText, dark && styles.textLight]} numberOfLines={2}>
                   {previewSnippet || 'No text loaded yet.'}
                 </Text>
               </View>
             )}
+
+            <View style={styles.actionsWrap}>
+              <ActionButton
+                label="Load sample"
+                icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                onPress={() => setText(SAMPLE_TEXT)}
+                variant="secondary"
+              />
+              <ActionButton
+                label="Clear"
+                icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                onPress={clearTextOnly}
+                variant="ghost"
+              />
+              <ActionButton
+                label="Reset"
+                icon={<Square size={16} color="#FFFFFF" />}
+                onPress={resetAll}
+              />
+            </View>
           </View>
 
           <View
