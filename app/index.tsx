@@ -50,6 +50,12 @@ type RecentSource = {
   hint: string;
 };
 
+type WorkflowStep = {
+  number: string;
+  title: string;
+  description: string;
+};
+
 function firstValue(value: string | string[] | undefined) {
   if (Array.isArray(value)) {
     return value[0];
@@ -1118,6 +1124,37 @@ function StatPill({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
+function WorkflowCard({
+  steps,
+  dark,
+}: {
+  steps: WorkflowStep[];
+  dark: boolean;
+}) {
+  return (
+    <View style={[styles.card, dark && styles.cardDark]}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          <RotateCcw size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+          <Text style={[styles.sectionTitle, dark && styles.textLight]}>Workflow</Text>
+        </View>
+      </View>
+      <Text style={[styles.helperText, dark && styles.textMuted]}>
+        Follow this order while using the app.
+      </Text>
+      <View style={styles.workflowGrid}>
+        {steps.map((step) => (
+          <View key={step.number} style={[styles.workflowStep, dark && styles.workflowStepDark]}>
+            <Text style={[styles.workflowNumber, dark && styles.textLight]}>{step.number}</Text>
+            <Text style={[styles.workflowStepTitle, dark && styles.textLight]}>{step.title}</Text>
+            <Text style={[styles.workflowStepDesc, dark && styles.textMuted]}>{step.description}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function FileRow({
   card,
   dark,
@@ -1650,6 +1687,29 @@ export default function HomeScreen() {
     }
   };
 
+  const workflowSteps: WorkflowStep[] = [
+    {
+      number: '1',
+      title: 'Open the app',
+      description: 'Land on a clean screen and choose the source you want to read.',
+    },
+    {
+      number: '2',
+      title: 'Put data in',
+      description: 'Paste text, a file path, a blog URL, or choose a local file.',
+    },
+    {
+      number: '3',
+      title: 'Confirm it',
+      description: 'Check the preview, recent inputs, and shared file card before reading.',
+    },
+    {
+      number: '4',
+      title: 'Read it',
+      description: 'Use Speak when the content looks right.',
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.safeArea}>
 
@@ -1662,13 +1722,12 @@ export default function HomeScreen() {
             <View style={styles.brandCopy}>
               <Text style={[styles.kicker, dark && styles.textSoft]}>Drive Reader</Text>
               <Text style={[styles.heroTitle, dark && styles.textLight]}>
-                Speak what you see, not what you tap.
+                Open, load, confirm, then read.
               </Text>
             </View>
           </View>
           <Text style={[styles.heroBody, dark && styles.textMuted]}>
-            Load text from sharing, deep links, or a file URI, then play it with one tap while you
-            are on the move.
+            Keep the flow simple: put content in, check the preview, and only then press Speak.
           </Text>
           <View style={styles.statsRow}>
             <StatPill icon={<Volume2 size={14} color="#0F172A" strokeWidth={2.5} />} label="TTS" />
@@ -1678,116 +1737,111 @@ export default function HomeScreen() {
             />
             <StatPill
               icon={<Share2 size={14} color="#0F172A" strokeWidth={2.5} />}
-              label="Share"
+              label="Flow"
             />
           </View>
         </View>
+
+        <WorkflowCard steps={workflowSteps} dark={dark} />
 
         <View style={[styles.card, dark && styles.cardDark]}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
-              <Link2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Incoming content</Text>
+              <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 2. Put data in</Text>
             </View>
             {isBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
           </View>
 
-          <Text style={[styles.statusText, dark && styles.textMuted]}>{status}</Text>
-
-          <View style={styles.infoRow}>
-            <Text style={[styles.metaLabel, dark && styles.textSoft]}>Share intent</Text>
-            <Text style={[styles.metaValue, dark && styles.textLight]}>
-              {hasShareIntent
-                ? sharedFiles.length
-                  ? `${sharedFiles.length} file(s)`
-                  : shareIntent?.webUrl
-                    ? 'web URL'
-                    : shareIntent?.text
-                      ? 'text'
-                      : 'available'
-                : 'none'}
-            </Text>
-          </View>
-
-          {selectedFile ? (
-            <View style={styles.filePreviewBox}>
-              <View style={styles.filePreviewHead}>
-                <FileAudio size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.filePreviewTitle, dark && styles.textLight]}>
-                  {selectedFile.fileName}
-                </Text>
+          <View style={styles.inputStack}>
+            <View style={styles.inputStackItem}>
+              <Text style={[styles.helperText, dark && styles.textMuted]}>
+                Pick a local file, paste a file path, or open a deep link.
+              </Text>
+              <TextInput
+                value={manualFileUri}
+                onChangeText={setManualFileUri}
+                placeholder="file:///path/to/book.txt"
+                placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={[styles.singleLineInput, dark && styles.textInputDark]}
+              />
+              <View style={styles.fileReaderActions}>
+                <ActionButton
+                  label="Read file"
+                  icon={<FileAudio size={16} color="#FFFFFF" />}
+                  onPress={loadFile}
+                />
+                <ActionButton
+                  label="Choose file"
+                  icon={<FileText size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={pickTextFile}
+                  variant="secondary"
+                />
+                <ActionButton
+                  label="App URL"
+                  icon={<Link2 size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={openAppUrl}
+                  variant="ghost"
+                />
               </View>
-              <Text style={[styles.fileMeta, dark && styles.textMuted]}>
-                {selectedFile.mimeType} 쨌 {formatBytes(selectedFile.size)}
-              </Text>
-              <Text style={[styles.fileMeta, dark && styles.textMuted]} numberOfLines={2}>
-                {selectedFile.path}
-              </Text>
             </View>
-          ) : null}
 
-          <View style={styles.actionsRow}>
-            <ActionButton
-              label="Speak"
-              icon={<Mic2 size={16} color="#FFFFFF" />}
-              onPress={speakText}
-            />
-            <ActionButton
-              label="Stop"
-              icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={stopSpeech}
-              variant="secondary"
-            />
+            <View style={styles.inputStackItem}>
+              <Text style={[styles.helperText, dark && styles.textMuted]}>
+                Paste a Naver blog URL if the content you want is on the web.
+              </Text>
+              <TextInput
+                value={blogUrl}
+                onChangeText={setBlogUrl}
+                placeholder="https://blog.naver.com/..."
+                placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={[styles.singleLineInput, dark && styles.textInputDark]}
+              />
+              <View style={styles.fileReaderActions}>
+                <ActionButton
+                  label="Extract"
+                  icon={<Link2 size={16} color="#FFFFFF" />}
+                  onPress={loadBlogText}
+                />
+                <ActionButton
+                  label="Example"
+                  icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={() =>
+                    setBlogUrl('https://m.blog.naver.com/PostView.naver?blogId=YOUR_ID&logNo=POST_NO')
+                  }
+                  variant="secondary"
+                />
+                <ActionButton
+                  label="Save"
+                  icon={<Square size={16} color="#FFFFFF" />}
+                  onPress={saveBlogSnapshot}
+                />
+                <ActionButton
+                  label="Share"
+                  icon={<Share2 size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                  onPress={shareBlogSnapshot}
+                  variant="ghost"
+                />
+              </View>
+            </View>
           </View>
         </View>
-
-        {recentSources.length > 0 ? (
-          <View style={[styles.card, dark && styles.cardDark]}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <RotateCcw size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Recent inputs</Text>
-              </View>
-            </View>
-            <Text style={[styles.helperText, dark && styles.textMuted]}>
-              Tap a recent file path, shared text, or deep link to restore it into the main input.
-            </Text>
-            <View style={styles.sourceChipList}>
-              {recentSources.map((source) => (
-                <SourceChip
-                  key={source.id}
-                  source={source}
-                  onPress={() => applyRecentSource(setManualFileUri, setText, setStatus, source)}
-                />
-              ))}
-            </View>
-          </View>
-        ) : null}
-
-        {sharedFiles.length > 0 ? (
-          <View style={[styles.card, dark && styles.cardDark]}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Shared files</Text>
-              </View>
-            </View>
-
-            <View style={styles.sharedList}>
-              {sharedFiles.map((card) => (
-                <FileRow key={`${card.file.path}-${card.file.fileName}`} card={card} dark={dark} />
-              ))}
-            </View>
-          </View>
-        ) : null}
 
         <View style={[styles.card, dark && styles.cardDark]}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <Volume2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Text to read</Text>
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 3. Confirm it</Text>
             </View>
           </View>
+
+          <Text style={[styles.helperText, dark && styles.textMuted]}>
+            Check the preview before you press Speak.
+          </Text>
 
           <TextInput
             value={text}
@@ -1839,95 +1893,100 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {recentSources.length > 0 ? (
+          <View style={[styles.card, dark && styles.cardDark]}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <RotateCcw size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Recent inputs</Text>
+              </View>
+            </View>
+            <Text style={[styles.helperText, dark && styles.textMuted]}>
+              Tap a recent file path, shared text, or deep link to restore it into the main input.
+            </Text>
+            <View style={styles.sourceChipList}>
+              {recentSources.map((source) => (
+                <SourceChip
+                  key={source.id}
+                  source={source}
+                  onPress={() => applyRecentSource(setManualFileUri, setText, setStatus, source)}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        {sharedFiles.length > 0 ? (
+          <View style={[styles.card, dark && styles.cardDark]}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.sectionTitle, dark && styles.textLight]}>Shared files</Text>
+              </View>
+            </View>
+
+            <View style={styles.sharedList}>
+              {sharedFiles.map((card) => (
+                <FileRow key={`${card.file.path}-${card.file.fileName}`} card={card} dark={dark} />
+              ))}
+            </View>
+          </View>
+        ) : null}
+
         <View style={[styles.card, dark && styles.cardDark]}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <Link2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Naver blog</Text>
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 4. Read it</Text>
             </View>
-            {isBlogBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
+            {isBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
           </View>
 
-          <Text style={[styles.helperText, dark && styles.textMuted]}>
-            Paste a Naver blog URL, extract the post body into a text snapshot, and read it here.
-          </Text>
+          <Text style={[styles.statusText, dark && styles.textMuted]}>{status}</Text>
 
-          <TextInput
-            value={blogUrl}
-            onChangeText={setBlogUrl}
-            placeholder="https://blog.naver.com/..."
-            placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={[styles.singleLineInput, dark && styles.textInputDark]}
-          />
-
-          <View style={styles.fileReaderActions}>
-            <ActionButton
-              label="Extract"
-              icon={<Link2 size={16} color="#FFFFFF" />}
-              onPress={loadBlogText}
-            />
-            <ActionButton
-              label="Example"
-              icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={() => setBlogUrl('https://m.blog.naver.com/PostView.naver?blogId=YOUR_ID&logNo=POST_NO')}
-              variant="secondary"
-            />
-            <ActionButton
-              label="Save"
-              icon={<Square size={16} color="#FFFFFF" />}
-              onPress={saveBlogSnapshot}
-            />
-            <ActionButton
-              label="Share"
-              icon={<Share2 size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={shareBlogSnapshot}
-              variant="ghost"
-            />
+          <View style={styles.infoRow}>
+            <Text style={[styles.metaLabel, dark && styles.textSoft]}>Share intent</Text>
+            <Text style={[styles.metaValue, dark && styles.textLight]}>
+              {hasShareIntent
+                ? sharedFiles.length
+                  ? `${sharedFiles.length} file(s)`
+                  : shareIntent?.webUrl
+                    ? 'web URL'
+                    : shareIntent?.text
+                      ? 'text'
+                      : 'available'
+                : 'none'}
+            </Text>
           </View>
-        </View>
 
-        <View style={[styles.card, dark && styles.cardDark]}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>File reader</Text>
+          {selectedFile ? (
+            <View style={styles.filePreviewBox}>
+              <View style={styles.filePreviewHead}>
+                <FileAudio size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.filePreviewTitle, dark && styles.textLight]}>
+                  {selectedFile.fileName}
+                </Text>
+              </View>
+              <Text style={[styles.fileMeta, dark && styles.textMuted]}>
+                {selectedFile.mimeType} 쨌 {formatBytes(selectedFile.size)}
+              </Text>
+              <Text style={[styles.fileMeta, dark && styles.textMuted]} numberOfLines={2}>
+                {selectedFile.path}
+              </Text>
             </View>
-          </View>
+          ) : null}
 
-          <Text style={[styles.helperText, dark && styles.textMuted]}>
-            Paste a local file path or file:// URI. If the file is text-based, Drive Reader loads
-            and speaks it.
-          </Text>
-
-          <TextInput
-            value={manualFileUri}
-            onChangeText={setManualFileUri}
-            placeholder="file:///path/to/book.txt"
-            placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={[styles.singleLineInput, dark && styles.textInputDark]}
-          />
-
-          <View style={styles.fileReaderActions}>
+          <View style={styles.actionsRow}>
             <ActionButton
-              label="Read file"
-              icon={<FileAudio size={16} color="#FFFFFF" />}
-              onPress={loadFile}
+              label="Speak"
+              icon={<Mic2 size={16} color="#FFFFFF" />}
+              onPress={speakText}
             />
             <ActionButton
-              label="Choose file"
-              icon={<FileText size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={pickTextFile}
+              label="Stop"
+              icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+              onPress={stopSpeech}
               variant="secondary"
-            />
-            <ActionButton
-              label="App URL"
-              icon={<Link2 size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={openAppUrl}
-              variant="ghost"
             />
           </View>
         </View>
@@ -2027,6 +2086,37 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontWeight: '700',
     fontSize: 13,
+  },
+  workflowGrid: {
+    gap: 10,
+  },
+  workflowStep: {
+    borderRadius: 18,
+    padding: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    gap: 5,
+  },
+  workflowStepDark: {
+    backgroundColor: '#081423',
+    borderColor: 'rgba(148, 163, 184, 0.16)',
+  },
+  workflowNumber: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: 1,
+  },
+  workflowStepTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  workflowStepDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#475569',
   },
   card: {
     borderRadius: 20,
@@ -2173,6 +2263,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
+  inputStack: {
+    gap: 14,
+  },
+  inputStackItem: {
+    gap: 10,
+  },
   fileReaderActions: {
     flexDirection: 'column',
     gap: 10,
@@ -2286,7 +2382,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sourceChip: {
-    minWidth: '46%',
+    minWidth: 150,
     flexGrow: 1,
     borderRadius: 18,
     paddingHorizontal: 14,
