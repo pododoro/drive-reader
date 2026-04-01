@@ -17,6 +17,7 @@ Last updated: 2026-04-01
 - Supporting scripts exist for live and golden validation.
 - Validation is driven by the repository's own `scripts/`-based checks.
 - Project documentation now lives in `docs/` for daily logging, status tracking, and PRD planning.
+- Branch naming and PR workflow notes live in `docs/branching.md`.
 
 ## Current Risks
 
@@ -33,6 +34,7 @@ Last updated: 2026-04-01
    - `npm run test:naver-live`
 4. Tighten the Naver extraction flow if live pages drift.
 5. Keep daily progress in `docs/daily-log.md` after each work session.
+6. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
 
 ## Reporting Standard
 
@@ -46,6 +48,7 @@ When you update this file, include:
 ## Branch and PR Workflow
 
 - Use `main` as the stable integration branch.
+- See `docs/branching.md` for naming conventions.
 - Create a topic branch for feature work, fixes, or doc updates.
 - Keep each PR focused on one concern.
 - Prefer small PRs that can be reviewed and merged independently.

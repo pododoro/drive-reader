@@ -57,10 +57,12 @@ Users need a simple way to extract readable text from content sources that are a
 - Use GitHub for remote version control and collaboration.
 - Record daily progress in `docs/daily-log.md`.
 - Update `docs/development-status-next.md` whenever the roadmap or current status changes.
+- Refer to `docs/branching.md` for branch naming and PR expectations.
 - Keep `main` as the protected integration branch.
 - Develop on short-lived topic branches.
 - Open a pull request for every meaningful change set before merging to `main`.
 - Use PRs to preserve review context, test results, and release notes.
+- Use `npm run log:new` to seed each day's handoff entry in `docs/daily-log.md`.
 
 ## Open Questions
 
