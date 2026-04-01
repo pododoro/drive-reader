@@ -1200,6 +1200,11 @@ export default function HomeScreen() {
     text: string;
     uri: string;
   } | null>(null);
+  const previewSnippet = text
+    .split(/\r?\n/)
+    .slice(0, 10)
+    .join('\n')
+    .trim();
 
   useEffect(() => {
     let alive = true;
@@ -1972,19 +1977,30 @@ export default function HomeScreen() {
             <View style={styles.readerHeader}>
               <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
               <Text style={[styles.readerHint, dark && styles.textMuted]}>
-                {isPreviewExpanded ? 'Tap Collapse to make this box shorter.' : 'Swipe inside this box to scroll long text.'}
+                {isPreviewExpanded
+                  ? 'Tap Collapse to return to a short preview.'
+                  : 'This shows the first 10 lines until you expand it.'}
               </Text>
             </View>
-            <ScrollView
-              testID="preview-scroll"
-              nestedScrollEnabled
-              showsVerticalScrollIndicator
-              style={styles.readerScroll}
-              contentContainerStyle={styles.readerScrollContent}>
-              <Text style={[styles.readerText, dark && styles.textLight]} selectable>
-                {text || 'No text loaded yet.'}
+            {isPreviewExpanded ? (
+              <ScrollView
+                testID="preview-scroll"
+                nestedScrollEnabled
+                showsVerticalScrollIndicator
+                style={styles.readerScroll}
+                contentContainerStyle={styles.readerScrollContent}>
+                <Text style={[styles.readerText, dark && styles.textLight]} selectable>
+                  {text || 'No text loaded yet.'}
+                </Text>
+              </ScrollView>
+            ) : (
+              <Text
+                style={[styles.readerText, styles.readerPreviewText, dark && styles.textLight]}
+                selectable
+                numberOfLines={10}>
+                {previewSnippet || 'No text loaded yet.'}
               </Text>
-            </ScrollView>
+            )}
           </View>
 
           <View style={styles.actionsWrap}>
@@ -2488,11 +2504,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     padding: 16,
     gap: 10,
-    height: 150,
+    height: 220,
     overflow: 'hidden',
   },
   readerBoxExpanded: {
-    height: 300,
+    height: 360,
   },
   readerBoxDark: {
     backgroundColor: '#081423',
@@ -2524,6 +2540,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     color: '#0F172A',
+  },
+  readerPreviewText: {
+    flexShrink: 1,
   },
   helperText: {
     color: '#475569',
