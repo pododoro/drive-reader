@@ -73,14 +73,15 @@ async function main() {
     await page.keyboard.press('PageDown');
 
     const toggle = page.getByTestId('preview-toggle');
-    const panel = page.getByTestId('preview-panel');
+    const body = page.getByTestId('confirm-body');
     const scroll = page.getByTestId('preview-scroll');
 
-    const beforeHeight = await panel.evaluate((element) => element.getBoundingClientRect().height);
+    const beforeHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
     await toggle.click();
     await page.waitForTimeout(100);
-    const afterHeight = await panel.evaluate((element) => element.getBoundingClientRect().height);
-    assert.ok(afterHeight > beforeHeight, `Expected preview panel to expand (${beforeHeight} -> ${afterHeight})`);
+    const afterHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
+    assert.ok(afterHeight < beforeHeight, `Expected confirm body to collapse (${beforeHeight} -> ${afterHeight})`);
+    assert.equal(await page.getByTestId('confirm-text-input').isVisible(), false);
 
     const scrollInfo = await scroll.evaluate((element) => {
       const node = element;
@@ -104,8 +105,9 @@ async function main() {
 
     await toggle.click();
     await page.waitForTimeout(100);
-    const collapsedHeight = await panel.evaluate((element) => element.getBoundingClientRect().height);
-    assert.ok(collapsedHeight < afterHeight, `Expected preview panel to collapse (${afterHeight} -> ${collapsedHeight})`);
+    const collapsedHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
+    assert.ok(collapsedHeight > afterHeight, `Expected confirm body to expand (${afterHeight} -> ${collapsedHeight})`);
+    assert.equal(await page.getByTestId('confirm-text-input').isVisible(), true);
 
     console.log('QA workflow passed.');
   } finally {

@@ -1195,7 +1195,7 @@ export default function HomeScreen() {
   const [recentSources, setRecentSources] = useState<RecentSource[]>([]);
   const [status, setStatus] = useState('Ready for text, file URIs, deep links, and share intents.');
   const [isBusy, setIsBusy] = useState(false);
-  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [isConfirmDetailsExpanded, setIsConfirmDetailsExpanded] = useState(true);
   const [inputMode, setInputMode] = useState<InputMode>('file');
 
   const [blogSnapshot, setBlogSnapshot] = useState<{
@@ -1493,7 +1493,7 @@ export default function HomeScreen() {
   const togglePreviewExpansion = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     Keyboard.dismiss();
-    setIsPreviewExpanded((value) => !value);
+    setIsConfirmDetailsExpanded((value) => !value);
   };
 
   const openAppUrl = async () => {
@@ -1962,77 +1962,83 @@ export default function HomeScreen() {
               testID="preview-toggle"
               style={({ pressed }) => [styles.expandButton, pressed && styles.buttonPressed]}>
               <Text style={styles.expandButtonLabel}>
-                {isPreviewExpanded ? 'Collapse' : 'Expand'}
+                {isConfirmDetailsExpanded ? 'Collapse' : 'Expand'}
               </Text>
             </Pressable>
           </View>
 
-          <Text style={[styles.helperText, dark && styles.textMuted]}>
-            Check the preview before you press Speak.
-          </Text>
-
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            testID="confirm-text-input"
-            multiline
-            scrollEnabled
-            textAlignVertical="top"
-            placeholder="Paste text here or load it from a share intent."
-            placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
-            style={[styles.textInput, dark && styles.textInputDark]}
-          />
-
           <View
-            testID="preview-panel"
-            style={[styles.readerBox, dark && styles.readerBoxDark, isPreviewExpanded && styles.readerBoxExpanded]}>
-            <View style={styles.readerHeader}>
-              <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
-              <Text style={[styles.readerHint, dark && styles.textMuted]}>
-                {isPreviewExpanded
-                  ? 'Tap Collapse to shrink this card and hide the extra lines.'
-                  : 'This shows a short preview until you expand it.'}
-              </Text>
-            </View>
-            {isPreviewExpanded ? (
-              <ScrollView
-                testID="preview-scroll"
-                nestedScrollEnabled
-                showsVerticalScrollIndicator
-                style={styles.readerScroll}
-                contentContainerStyle={styles.readerScrollContent}>
-                <Text style={[styles.readerText, dark && styles.textLight]} selectable>
-                  {text || 'No text loaded yet.'}
+            testID="confirm-body"
+            style={[styles.confirmBody, !isConfirmDetailsExpanded && styles.confirmBodyCollapsed]}>
+            {isConfirmDetailsExpanded ? (
+              <>
+                <Text style={[styles.helperText, dark && styles.textMuted]}>
+                  Check the preview before you press Speak.
                 </Text>
-              </ScrollView>
+
+                <TextInput
+                  value={text}
+                  onChangeText={setText}
+                  testID="confirm-text-input"
+                  multiline
+                  scrollEnabled
+                  textAlignVertical="top"
+                  placeholder="Paste text here or load it from a share intent."
+                  placeholderTextColor={dark ? '#64748B' : '#94A3B8'}
+                  style={[styles.textInput, dark && styles.textInputDark]}
+                />
+
+                <View style={styles.actionsWrap}>
+                  <ActionButton
+                    label="Load sample"
+                    icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                    onPress={() => setText(SAMPLE_TEXT)}
+                    variant="secondary"
+                  />
+                  <ActionButton
+                    label="Clear"
+                    icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                    onPress={clearTextOnly}
+                    variant="ghost"
+                  />
+                  <ActionButton
+                    label="Reset"
+                    icon={<Square size={16} color="#FFFFFF" />}
+                    onPress={resetAll}
+                  />
+                </View>
+              </>
             ) : (
-              <Text
-                style={[styles.readerText, styles.readerPreviewText, dark && styles.textLight]}
-                selectable
-                numberOfLines={4}>
-                {previewSnippet || 'No text loaded yet.'}
-              </Text>
+              <View style={styles.confirmSummary}>
+                <Text style={[styles.helperText, dark && styles.textMuted]}>
+                  Edit area collapsed. Reader stays visible below.
+                </Text>
+                <Text style={[styles.confirmSummaryText, dark && styles.textLight]} numberOfLines={2}>
+                  {previewSnippet || 'No text loaded yet.'}
+                </Text>
+              </View>
             )}
           </View>
 
-          <View style={styles.actionsWrap}>
-            <ActionButton
-              label="Load sample"
-              icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={() => setText(SAMPLE_TEXT)}
-              variant="secondary"
-            />
-            <ActionButton
-              label="Clear"
-              icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-              onPress={clearTextOnly}
-              variant="ghost"
-            />
-            <ActionButton
-              label="Reset"
-              icon={<Square size={16} color="#FFFFFF" />}
-              onPress={resetAll}
-            />
+          <View
+            testID="preview-panel"
+            style={[styles.readerBox, dark && styles.readerBoxDark]}>
+            <View style={styles.readerHeader}>
+              <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
+              <Text style={[styles.readerHint, dark && styles.textMuted]}>
+                Swipe inside this box to scroll long text.
+              </Text>
+            </View>
+            <ScrollView
+              testID="preview-scroll"
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
+              style={styles.readerScroll}
+              contentContainerStyle={styles.readerScrollContent}>
+              <Text style={[styles.readerText, dark && styles.textLight]} selectable>
+                {text || 'No text loaded yet.'}
+              </Text>
+            </ScrollView>
           </View>
         </View>
 
@@ -2509,6 +2515,21 @@ const styles = StyleSheet.create({
     color: '#E2E8F0',
     borderColor: 'rgba(148, 163, 184, 0.16)',
   },
+  confirmBody: {
+    gap: 12,
+  },
+  confirmBodyCollapsed: {
+    gap: 8,
+  },
+  confirmSummary: {
+    gap: 6,
+    paddingVertical: 2,
+  },
+  confirmSummaryText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#0F172A',
+  },
   readerBox: {
     borderRadius: 20,
     borderWidth: 1,
@@ -2518,9 +2539,6 @@ const styles = StyleSheet.create({
     gap: 10,
     height: 220,
     overflow: 'hidden',
-  },
-  readerBoxExpanded: {
-    height: 360,
   },
   readerBoxDark: {
     backgroundColor: '#081423',
@@ -2552,9 +2570,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     color: '#0F172A',
-  },
-  readerPreviewText: {
-    flexShrink: 1,
   },
   helperText: {
     color: '#475569',
