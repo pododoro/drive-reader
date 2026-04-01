@@ -1176,6 +1176,7 @@ export default function HomeScreen() {
   const [status, setStatus] = useState('Ready for text, file URIs, deep links, and share intents.');
   const [isBusy, setIsBusy] = useState(false);
   const [isBlogBusy, setIsBlogBusy] = useState(false);
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const [blogSnapshot, setBlogSnapshot] = useState<{
     title: string;
@@ -1692,7 +1693,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <FileText size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 2. Put data in</Text>
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Put data in</Text>
             </View>
             {isBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
           </View>
@@ -1779,8 +1780,14 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <Volume2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 3. Confirm it</Text>
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Confirm it</Text>
             </View>
+            <ActionButton
+              label={isPreviewExpanded ? 'Collapse' : 'Expand'}
+              icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+              onPress={() => setIsPreviewExpanded((value) => !value)}
+              variant="ghost"
+            />
           </View>
 
           <Text style={[styles.helperText, dark && styles.textMuted]}>
@@ -1798,11 +1805,11 @@ export default function HomeScreen() {
             style={[styles.textInput, dark && styles.textInputDark]}
           />
 
-          <View style={[styles.readerBox, dark && styles.readerBoxDark]}>
+          <View style={[styles.readerBox, dark && styles.readerBoxDark, isPreviewExpanded && styles.readerBoxExpanded]}>
             <View style={styles.readerHeader}>
               <Text style={[styles.readerLabel, dark && styles.textSoft]}>Reader</Text>
               <Text style={[styles.readerHint, dark && styles.textMuted]}>
-                Swipe inside this box to scroll long text.
+                {isPreviewExpanded ? 'Tap Collapse to make this box shorter.' : 'Swipe inside this box to scroll long text.'}
               </Text>
             </View>
             <ScrollView
@@ -1881,7 +1888,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <Link2 size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Step 4. Read it</Text>
+              <Text style={[styles.sectionTitle, dark && styles.textLight]}>Read it</Text>
             </View>
             {isBusy ? <ActivityIndicator color={dark ? '#E2E8F0' : '#0F172A'} /> : null}
           </View>
@@ -2266,7 +2273,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     padding: 16,
     gap: 10,
-    maxHeight: 300,
+    maxHeight: 180,
+  },
+  readerBoxExpanded: {
+    maxHeight: 320,
   },
   readerBoxDark: {
     backgroundColor: '#081423',
@@ -2287,7 +2297,7 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   readerScroll: {
-    maxHeight: 240,
+    maxHeight: 260,
   },
   readerScrollContent: {
     paddingBottom: 6,
