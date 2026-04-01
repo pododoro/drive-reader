@@ -10,6 +10,7 @@ import {
   View,
   Share,
 } from 'react-native';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
@@ -48,12 +49,6 @@ type RecentSource = {
   label: string;
   value: string;
   hint: string;
-};
-
-type WorkflowStep = {
-  number: string;
-  title: string;
-  description: string;
 };
 
 function firstValue(value: string | string[] | undefined) {
@@ -1124,37 +1119,6 @@ function StatPill({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
-function WorkflowCard({
-  steps,
-  dark,
-}: {
-  steps: WorkflowStep[];
-  dark: boolean;
-}) {
-  return (
-    <View style={[styles.card, dark && styles.cardDark]}>
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionTitleRow}>
-          <RotateCcw size={18} color={dark ? '#E2E8F0' : '#0F172A'} />
-          <Text style={[styles.sectionTitle, dark && styles.textLight]}>Workflow</Text>
-        </View>
-      </View>
-      <Text style={[styles.helperText, dark && styles.textMuted]}>
-        Follow this order while using the app.
-      </Text>
-      <View style={styles.workflowGrid}>
-        {steps.map((step) => (
-          <View key={step.number} style={[styles.workflowStep, dark && styles.workflowStepDark]}>
-            <Text style={[styles.workflowNumber, dark && styles.textLight]}>{step.number}</Text>
-            <Text style={[styles.workflowStepTitle, dark && styles.textLight]}>{step.title}</Text>
-            <Text style={[styles.workflowStepDesc, dark && styles.textMuted]}>{step.description}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
 function FileRow({
   card,
   dark,
@@ -1687,29 +1651,6 @@ export default function HomeScreen() {
     }
   };
 
-  const workflowSteps: WorkflowStep[] = [
-    {
-      number: '1',
-      title: 'Open the app',
-      description: 'Land on a clean screen and choose the source you want to read.',
-    },
-    {
-      number: '2',
-      title: 'Put data in',
-      description: 'Paste text, a file path, a blog URL, or choose a local file.',
-    },
-    {
-      number: '3',
-      title: 'Confirm it',
-      description: 'Check the preview, recent inputs, and shared file card before reading.',
-    },
-    {
-      number: '4',
-      title: 'Read it',
-      description: 'Use Speak when the content looks right.',
-    },
-  ];
-
   return (
     <SafeAreaView style={styles.safeArea}>
 
@@ -1725,6 +1666,11 @@ export default function HomeScreen() {
                 Open, load, confirm, then read.
               </Text>
             </View>
+            <Link href="/workflow" asChild>
+              <Pressable style={({ pressed }) => [styles.helpPill, pressed && styles.buttonPressed]}>
+                <Text style={styles.helpPillText}>How to use</Text>
+              </Pressable>
+            </Link>
           </View>
           <Text style={[styles.heroBody, dark && styles.textMuted]}>
             Keep the flow simple: put content in, check the preview, and only then press Speak.
@@ -1741,8 +1687,6 @@ export default function HomeScreen() {
             />
           </View>
         </View>
-
-        <WorkflowCard steps={workflowSteps} dark={dark} />
 
         <View style={[styles.card, dark && styles.cardDark]}>
           <View style={styles.sectionHeader}>
@@ -2025,6 +1969,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 14,
     alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
   brandMark: {
     width: 44,
@@ -2058,6 +2003,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: '#334155',
   },
+  helpPill: {
+    alignSelf: 'center',
+    borderRadius: 999,
+    backgroundColor: '#0F172A',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  helpPillText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
   statsRow: {
     flexDirection: 'row',
     gap: 10,
@@ -2086,37 +2043,6 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontWeight: '700',
     fontSize: 13,
-  },
-  workflowGrid: {
-    gap: 10,
-  },
-  workflowStep: {
-    borderRadius: 18,
-    padding: 16,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.08)',
-    gap: 6,
-  },
-  workflowStepDark: {
-    backgroundColor: '#081423',
-    borderColor: 'rgba(148, 163, 184, 0.16)',
-  },
-  workflowNumber: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: 1,
-  },
-  workflowStepTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  workflowStepDesc: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: '#475569',
   },
   card: {
     borderRadius: 20,
