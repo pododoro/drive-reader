@@ -29,6 +29,8 @@ Last updated: 2026-04-01
 - Android now has a local TTS native module at `android/app/src/main/java/com/anonymous/drivereader/LocalTtsModule.kt`.
 - The speech controller uses the Android local TTS path first and falls back to `expo-speech` elsewhere.
 - An iOS source scaffold exists at `ios/LocalTtsModule.swift`, but the iOS project is not generated in this repository yet.
+- Android builds require JDK 17 in this environment; JDK 25 caused a Gradle class file version mismatch during `expo run:android`.
+- Android settings.gradle now uses explicit includeBuild paths and no longer sets an unsupported `projectRoot` on ReactSettingsExtension.
 
 ## Current Risks
 
@@ -47,12 +49,13 @@ Last updated: 2026-04-01
 4. Keep workflow QA aligned with the current UI and interaction model.
 5. Finish the speech-controller boundary and implement the local TTS native module that can feed `expo-audio`.
 5. Harden the Android local TTS native module and verify it in a device build.
-6. Bring the iOS implementation in once the iOS project is generated.
-7. Keep the native plan aligned across Android, iOS, and the player integration docs.
-8. Tighten the Naver extraction flow if live pages drift.
-9. Keep daily progress in `docs/daily-log.md` after each work session.
-10. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
-11. Use `docs/testing-strategy.md` to decide when web QA is enough and when native verification is needed.
+6. Keep Android builds pinned to JDK 17 in this environment.
+7. Bring the iOS implementation in once the iOS project is generated.
+8. Keep the native plan aligned across Android, iOS, and the player integration docs.
+9. Tighten the Naver extraction flow if live pages drift.
+10. Keep daily progress in `docs/daily-log.md` after each work session.
+11. Use `npm run log:new` to add a fresh dated section before writing the day's notes.
+12. Use `docs/testing-strategy.md` to decide when web QA is enough and when native verification is needed.
 
 ## Reporting Standard
 

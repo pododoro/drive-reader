@@ -31,6 +31,7 @@ Purpose: capture one concise entry per workday so the next agent can reconstruct
 - Done: Installed `expo-audio`, enabled background playback in app config, and initialized the audio session at app start.
 - Done: Added Android, iOS, and player integration plans for the local TTS path, plus a shared `services/local-tts.ts` contract for the upcoming native module.
 - Done: Added an Android local TTS native module, wired the speech controller to prefer local audio on Android, and added an iOS source scaffold for the same contract.
+- Done: Fixed Android Gradle settings for this repo's Expo/React Native version and pinned the local Android build flow to JDK 17 instead of the installed JDK 25.
 - Verified: `git push -u origin main` completed successfully after reconciling the remote `main` branch; local branch now tracks `origin/main`. The workflow QA smoke test passed with `npm run qa:workflow` against the local web build, and `npm run lint` / `npx tsc --noEmit` remained clean.
 - Blocked: Android native background playback still needs a device build to verify the new module end to end, and iOS still needs a generated project before the scaffold can be wired in.
-- Next: Run a device build for Android, then finish the iOS implementation once the iOS project exists.
+- Next: Re-run `npm.cmd run android` with JDK 17 active, then finish the iOS implementation once the iOS project exists.

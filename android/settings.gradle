@@ -9,7 +9,6 @@ plugins {
 }
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-  ex.projectRoot = file("..")
   if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
     ex.autolinkLibrariesFromCommand()
   } else {
