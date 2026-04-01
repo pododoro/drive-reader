@@ -22,6 +22,7 @@ Last updated: 2026-04-01
 - Branch naming and PR workflow notes live in `docs/branching.md`.
 - Testing guidance and native automation strategy live in `docs/testing-strategy.md`.
 - Background audio migration notes now live in `docs/background-audio-migration.md`.
+- `expo-audio` is installed and the app is configured for background playback.
 
 ## Current Risks
 
@@ -38,7 +39,7 @@ Last updated: 2026-04-01
    - `npm run test:naver-live`
    - `npm run qa:workflow`
 4. Keep workflow QA aligned with the current UI and interaction model.
-5. Finish the speech-controller boundary and choose the audio-backed TTS source for background playback.
+5. Finish the speech-controller boundary and implement the local TTS native module that can feed `expo-audio`.
 6. Tighten the Naver extraction flow if live pages drift.
 7. Keep daily progress in `docs/daily-log.md` after each work session.
 8. Use `npm run log:new` to add a fresh dated section before writing the day's notes.

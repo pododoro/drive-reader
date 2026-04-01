@@ -4,6 +4,8 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { setAudioModeAsync } from 'expo-audio';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,6 +13,16 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const shareIntentDisabled = Platform.OS === 'web' || Constants.appOwnership === 'expo';
+
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: 'doNotMix',
+    }).catch(() => {
+      // Background audio setup can fail in Expo Go or unsupported environments.
+    });
+  }, []);
 
   return (
     <ShareIntentProvider

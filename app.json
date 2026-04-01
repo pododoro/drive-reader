@@ -29,6 +29,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true
+        }
+      ],
+      [
         "expo-share-intent",
         {
           "iosActivationRules": {

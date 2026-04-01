@@ -9,6 +9,8 @@ Let the app continue playback in the background and expose play/stop controls fr
 - The app still uses `expo-speech` for text-to-speech.
 - Playback control is isolated behind `services/speech-controller.ts`.
 - The UI calls a single speech controller boundary instead of talking to `expo-speech` directly.
+- `expo-audio` is installed and the app config enables background playback.
+- The root layout now initializes the audio session with background playback enabled.
 
 ## Important Constraint
 
@@ -29,7 +31,5 @@ Let the app continue playback in the background and expose play/stop controls fr
 
 ## Next Implementation Step
 
-- Decide where speech audio will come from:
-  - a local/native TTS source exposed through a custom module, or
-  - a remote TTS service that returns audio files for playback.
-
+- Build the local TTS source as a native module so it can emit audio for `expo-audio` playback.
+- After that, wire play / pause / stop into the audio player and lock-screen controls.
