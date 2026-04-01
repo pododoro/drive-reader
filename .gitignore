@@ -41,3 +41,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# local Gradle cache used during sandboxed Android builds
+.gradle-home/
