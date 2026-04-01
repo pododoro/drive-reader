@@ -82,6 +82,9 @@ async function main() {
     const afterHeight = await body.evaluate((element) => element.getBoundingClientRect().height);
     assert.ok(afterHeight < beforeHeight, `Expected confirm body to collapse (${beforeHeight} -> ${afterHeight})`);
     assert.equal(await page.getByTestId('confirm-text-input').isVisible(), false);
+    assert.equal(await page.getByTestId('load-sample-button').isVisible(), true);
+    assert.equal(await page.getByTestId('clear-button').isVisible(), true);
+    assert.equal(await page.getByTestId('reset-button').isVisible(), true);
 
     const scrollInfo = await scroll.evaluate((element) => {
       const node = element;

@@ -1974,6 +1974,29 @@ export default function HomeScreen() {
               Check the preview before you press Speak.
             </Text>
 
+            <View style={styles.actionsWrap}>
+              <ActionButton
+                label="Load sample"
+                icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                onPress={() => setText(SAMPLE_TEXT)}
+                variant="secondary"
+                testID="load-sample-button"
+              />
+              <ActionButton
+                label="Clear"
+                icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
+                onPress={clearTextOnly}
+                variant="ghost"
+                testID="clear-button"
+              />
+              <ActionButton
+                label="Reset"
+                icon={<Square size={16} color="#FFFFFF" />}
+                onPress={resetAll}
+                testID="reset-button"
+              />
+            </View>
+
             {isConfirmDetailsExpanded ? (
               <TextInput
                 value={text}
@@ -1993,26 +2016,6 @@ export default function HomeScreen() {
                 </Text>
               </View>
             )}
-
-            <View style={styles.actionsWrap}>
-              <ActionButton
-                label="Load sample"
-                icon={<RotateCcw size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                onPress={() => setText(SAMPLE_TEXT)}
-                variant="secondary"
-              />
-              <ActionButton
-                label="Clear"
-                icon={<Square size={16} color={dark ? '#E2E8F0' : '#0F172A'} />}
-                onPress={clearTextOnly}
-                variant="ghost"
-              />
-              <ActionButton
-                label="Reset"
-                icon={<Square size={16} color="#FFFFFF" />}
-                onPress={resetAll}
-              />
-            </View>
           </View>
 
           <View
