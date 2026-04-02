@@ -6,6 +6,8 @@
     "start": "expo start",
     "dev-client": "expo start --dev-client",
     "prebuild": "expo prebuild --no-install --clean",
+    "android:apk": "powershell -Command \"cd android; .\\gradlew.bat assembleRelease\"",
+    "android:apk:debug": "powershell -Command \"cd android; .\\gradlew.bat app:assembleDebug\"",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
