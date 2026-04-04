@@ -1,6 +1,6 @@
 pluginManagement {
-  includeBuild("../node_modules/@react-native/gradle-plugin")
-  includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugin")
+  includeBuild(new File(settingsDir, "../node_modules/@react-native/gradle-plugin").canonicalPath)
+  includeBuild(new File(settingsDir, "../node_modules/expo-modules-autolinking/android/expo-gradle-plugin").canonicalPath)
 }
 
 plugins {
@@ -22,4 +22,4 @@ rootProject.name = 'drive-reader'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
-includeBuild(expoAutolinking.reactNativeGradlePlugin)
+includeBuild(expoAutolinking.reactNativeGradlePlugin.canonicalPath)
